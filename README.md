@@ -8,4 +8,6 @@ Cada proyecto se publica por fases: levantamiento AS-IS, diseño, implementació
 
 ## Proyectos
 
-_Próximamente._
+| Proyecto | Descripción | Fases publicadas |
+|---|---|---|
+| [LogiTrans Iberia](logitrans-iberia/) | Modernización de la red y la seguridad de una empresa logística ficticia (nave en Barcelona, 60 empleados): Cisco, FortiGate, Active Directory, GNS3 y Proxmox. | Fase 0 |
