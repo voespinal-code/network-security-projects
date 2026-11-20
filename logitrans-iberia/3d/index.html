@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LogiTrans Iberia · Concepto 3D del cableado</title>
+<meta name="description" content="Modelo 3D navegable del cableado estructurado de LogiTrans Iberia (empresa ficticia): bandejas, troncal de fibra OM4, 54 tomas dobles y racks OF-01 y AL-01 con su electrónica.">
+<meta name="author" content="Víctor Espinal">
+<meta property="og:type" content="website">
+<meta property="og:title" content="LogiTrans Iberia · Concepto 3D del cableado estructurado">
+<meta property="og:description" content="Nave logística de 60 × 40 m en 3D: recorre el cableado, abre los racks y consulta cada elemento. Caso de ingeniería de redes ficticio.">
+<meta property="og:image" content="https://voespinal-code.github.io/network-security-projects/logitrans-iberia/assets/img/3d/portada-3d.png">
+<meta property="og:url" content="https://voespinal-code.github.io/network-security-projects/logitrans-iberia/3d/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Maqueta técnica clara: lienzo 3D a pantalla completa, panel de capas a la izquierda, ficha abajo a la derecha */
+  color-scheme: light;
+  --paper:#dfe6ec; --panel:#ffffff; --ink:#1b2632; --muted:#5d6b78; --line:#d0d8de;
+  --of:#8e24aa; --al:#00838f; --trunk:#e8590c; --tray:#6b7f8e; --accent:#12395c;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Barlow","Segoe UI",Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.35;overflow:hidden}
+#stage{position:fixed;inset:0}
+#stage canvas{display:block;width:100%;height:100%;touch-action:none}
+.panel{position:fixed;top:12px;left:12px;bottom:12px;width:292px;background:var(--panel);border:1px solid var(--line);
+  border-radius:6px;box-shadow:0 6px 24px rgba(27,38,50,.14);display:flex;flex-direction:column;overflow:hidden}
+.panel header{padding:14px 16px 12px;border-bottom:3px solid var(--accent)}
+.eyebrow{font-family:var(--display);font-weight:600;letter-spacing:.08em;font-size:12px;color:var(--muted);text-transform:uppercase}
+h1{font-family:var(--display);font-weight:700;font-size:26px;line-height:1.05;margin:2px 0 4px;text-wrap:balance}
+.sub{color:var(--muted);font-size:12.5px}
+.scroll{overflow-y:auto;padding:12px 16px 16px;display:flex;flex-direction:column;gap:16px}
+h2{font-family:var(--display);font-weight:600;font-size:14px;letter-spacing:.07em;text-transform:uppercase;margin:0 0 6px;color:var(--accent)}
+.views{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+button{font:inherit;color:var(--ink);cursor:pointer}
+.views button,.tour{background:#f3f6f8;border:1px solid var(--line);border-radius:4px;padding:7px 8px;text-align:left;font-weight:500}
+.views button:hover,.tour:hover{background:#e7edf2}
+.views button.rk{grid-column:span 2;border-left:4px solid #b3261e}
+.views button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.tour{width:100%;margin-top:6px;text-align:center;font-weight:600}
+.tour[aria-pressed="true"]{background:var(--trunk);border-color:var(--trunk);color:#fff}
+button:focus-visible,input:focus-visible{outline:2px solid var(--trunk);outline-offset:2px}
+.layers{display:flex;flex-direction:column;gap:2px}
+.layers label{display:grid;grid-template-columns:18px 16px 1fr;align-items:center;gap:8px;padding:4px 2px;cursor:pointer;border-radius:3px}
+.layers label:hover{background:#f3f6f8}
+.layers input{margin:0;width:15px;height:15px;accent-color:var(--accent)}
+.sw{width:16px;height:6px;border-radius:2px;background:var(--tray)}
+.sw.sq{height:12px;width:12px;margin-left:2px}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.kpi div{border:1px solid var(--line);border-radius:4px;padding:6px 8px}
+.kpi b{display:block;font-family:var(--display);font-size:22px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.kpi span{font-size:11.5px;color:var(--muted)}
+.note{font-size:11.5px;color:var(--muted);border-left:3px solid var(--trunk);padding-left:8px;margin:0}
+.note a{color:var(--accent);font-weight:600}
+#card{position:fixed;right:12px;bottom:12px;width:330px;max-width:calc(100% - 24px);max-height:62%;overflow-y:auto;background:var(--panel);border:1px solid var(--line);
+  border-radius:6px;box-shadow:0 6px 24px rgba(27,38,50,.14);padding:12px 14px}
+#card h3{font-family:var(--display);font-size:19px;font-weight:700;margin:0 0 4px;line-height:1.1}
+#card dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:13px}
+#card dt{color:var(--muted)}#card dd{margin:0;font-variant-numeric:tabular-nums}
+#card p{margin:0 0 6px;color:var(--muted);font-size:13px}
+#card table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums}
+#card td{padding:2px 6px 2px 0;border-top:1px solid #edf0f3;vertical-align:top}
+#card td:first-child{color:var(--muted);white-space:nowrap;width:1%}
+#card td b{font-weight:600}
+body.iso #hint{display:none}body.iso #card{top:12px;bottom:auto;width:290px}
+#hint{position:fixed;top:12px;right:12px;background:rgba(255,255,255,.85);border:1px solid var(--line);border-radius:4px;padding:5px 9px;font-size:12px;color:var(--muted);max-width:calc(100% - 340px)}
+#toggle{display:none;position:fixed;top:12px;left:12px;z-index:3;background:var(--accent);color:#fff;border:0;border-radius:4px;padding:8px 12px;font-weight:600}
+#err{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px;text-align:center;background:var(--paper)}
+@media (max-width:760px){
+  #toggle{display:block}
+  .panel{top:52px;bottom:auto;max-height:calc(100% - 64px);width:min(292px,calc(100% - 24px));z-index:2}
+  .panel.closed{display:none}
+  #hint{display:none}
+  #card{width:auto;left:12px;max-height:38%}
+}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<button id="toggle" type="button" aria-controls="panel">Capas y vistas</button>
+
+<aside class="panel" id="panel" aria-label="Capas y vistas">
+  <header>
+    <div class="eyebrow">Logitrans Iberia, S.L. · Fase 02</div>
+    <h1>Concepto 3D de cableado estructurado</h1>
+    <div class="sub">Nave 60 × 40 m · base plano LGT-F02-CAB-01 Rev. 01</div>
+  </header>
+  <div class="scroll">
+    <section>
+      <h2>Vistas</h2>
+      <div class="views" id="views">
+        <button type="button" data-v="general" aria-pressed="true">General</button>
+        <button type="button" data-v="planta">Planta</button>
+        <button type="button" data-v="oficinas">Oficinas</button>
+        <button type="button" data-v="almacen">Almacén</button>
+        <button type="button" data-v="picking">Picking</button>
+        <button type="button" data-v="muelles">Muelles</button>
+        <button type="button" data-v="sala-ti">Sala de TI</button>
+        <button type="button" data-v="sala-tecnica">Sala técnica</button>
+        <button type="button" class="rk" data-v="rack-of01">Detalle del rack OF-01 (oficinas)</button>
+        <button type="button" class="rk" data-v="rack-al01">Detalle del rack AL-01 (edificio)</button>
+      </div>
+      <button type="button" class="tour" id="tour" aria-pressed="false">Iniciar recorrido automático</button>
+    </section>
+    <section>
+      <h2>Capas</h2>
+      <div class="layers" id="layers">
+        <label><input type="checkbox" id="l-trunk" checked><i class="sw" style="background:var(--trunk)"></i>Troncal OM4 12F + 2×Cat6A</label>
+        <label><input type="checkbox" id="l-trays" checked><i class="sw"></i>Bandejas y canalizaciones</label>
+        <label><input type="checkbox" id="l-hof" checked><i class="sw" style="background:var(--of)"></i>Horizontal Cat6A → OF-01</label>
+        <label><input type="checkbox" id="l-hal" checked><i class="sw" style="background:var(--al)"></i>Horizontal Cat6A → AL-01</label>
+        <label><input type="checkbox" id="l-to" checked><i class="sw sq" style="background:linear-gradient(90deg,var(--of) 50%,var(--al) 50%)"></i>Tomas dobles (TO)</label>
+        <label><input type="checkbox" id="l-racks" checked><i class="sw sq" style="background:#2f6fb0"></i>Estanterías paletizadas</label>
+        <label><input type="checkbox" id="l-furn" checked><i class="sw sq" style="background:#c9b79a"></i>Mobiliario, carretillas y camiones</label>
+        <label><input type="checkbox" id="l-struct" checked><i class="sw sq" style="background:#7d8b98"></i>Estructura metálica y luminarias</label>
+        <label><input type="checkbox" id="l-labels" checked><i class="sw sq" style="background:#fff;border:1px solid var(--line)"></i>Etiquetas</label>
+        <label><input type="checkbox" id="l-shell"><i class="sw sq" style="background:#b9c7d3"></i>Fachada alta y cubierta</label>
+      </div>
+    </section>
+    <section>
+      <h2>Cifras del plano</h2>
+      <div class="kpi">
+        <div><b>54</b><span>TO dobles</span></div>
+        <div><b>108</b><span>tomas RJ45 Cat6A</span></div>
+        <div><b>32 / 22</b><span>TO en OF-01 / AL-01</span></div>
+        <div><b>72 m</b><span>troncal de fibra OM4</span></div>
+        <div><b>63,9 m</b><span>enlace máx. (≤ 90 m)</span></div>
+        <div><b>24,2 %</b><span>ocupación máx. bandeja</span></div>
+      </div>
+    </section>
+    <p class="note"><b>LogiTrans Iberia es una empresa ficticia.</b> Caso de portafolio de <a href="https://github.com/voespinal-code/network-security-projects/tree/main/logitrans-iberia">Víctor Espinal en GitHub</a>. Diseño conceptual, no apto para obra. Alturas, recorridos de cable y posición exacta de tomas son hipótesis. La electrónica montada en los racks es una propuesta a partir de la demo de topología: el plano de Fase 02 solo reserva las U.</p>
+  </div>
+</aside>
+
+<div id="hint">Arrastra para girar · rueda para acercar · botón derecho para desplazar · clic en un elemento para ver su ficha</div>
+<div id="card" aria-live="polite"><h3>Ficha del elemento</h3><p>Haz clic en una sala, una bandeja, el troncal, un rack o un equipo.</p></div>
+<div id="err"><p>Este navegador no puede mostrar gráficos 3D (WebGL desactivado). Ábrelo en Chrome, Edge o Safari actualizados.</p></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
+<script>
+(function(){
+'use strict';
+var errEl=document.getElementById('err');
+if(!window.THREE){errEl.style.display='flex';return;}
+var T=THREE,V3=T.Vector3,PI=Math.PI;
+var stage=document.getElementById('stage'),renderer;
+try{renderer=new T.WebGLRenderer({antialias:true});}catch(e){errEl.style.display='flex';return;}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer.outputEncoding=T.sRGBEncoding;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.82;
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
+stage.appendChild(renderer.domElement);
+var ANISO=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+
+var scene=new T.Scene();scene.background=new T.Color(0xdfe6ec);scene.fog=new T.Fog(0xdfe6ec,150,340);
+try{if(T.RoomEnvironment){var pm=new T.PMREMGenerator(renderer);scene.environment=pm.fromScene(new T.RoomEnvironment(),.04).texture;}}catch(e){}
+var camera=new T.PerspectiveCamera(38,1,0.05,700);
+var controls=new T.OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.dampingFactor=.08;controls.maxPolarAngle=PI*0.495;controls.minDistance=.6;controls.maxDistance=170;
+scene.add(new T.HemisphereLight(0xffffff,0x9aa4ad,scene.environment?.12:.9));
+var sun=new T.DirectionalLight(0xfff1dc,1.5);sun.position.set(-40,70,35);sun.castShadow=true;
+sun.shadow.mapSize.set(4096,4096);var sc=sun.shadow.camera;sc.left=-60;sc.right=70;sc.top=50;sc.bottom=-50;sc.near=1;sc.far=200;sun.shadow.bias=-0.0004;sun.shadow.normalBias=.03;
+scene.add(sun);
+
+// Coordenadas del plano: x = este (0..60), z = sur (0..40), y = altura. La raíz centra la nave.
+var root=new T.Group();root.position.set(-30,0,-20);scene.add(root);
+var L={};['base','furn','racks','trays','trunk','hof','hal','to','labels','struct','shell'].forEach(function(k){L[k]=new T.Group();root.add(L[k]);});
+L.shell.visible=false;
+var pick=[],RK={};
+var seed=11;function rnd(){seed=(seed*16807)%2147483647;return(seed-1)/2147483646;}
+
+// ---------- Texturas procedurales ----------
+function tex(w,h,draw,rx,ry){var cv=document.createElement('canvas');cv.width=w;cv.height=h;draw(cv.getContext('2d'),w,h);
+  var t=new T.CanvasTexture(cv);t.encoding=T.sRGBEncoding;t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(rx||1,ry||1);t.anisotropy=ANISO;return t;}
+function noise(c,w,h,n,a){for(var i=0;i<n;i++){var v=rnd()<.5?0:255;c.fillStyle='rgba('+v+','+v+','+v+','+(rnd()*a)+')';var s=1+rnd()*2.5;c.fillRect(rnd()*w,rnd()*h,s,s);}}
+function blot(c,w,h,n,a){for(var i=0;i<n;i++){var x=rnd()*w,y=rnd()*h,r=20+rnd()*90,g=c.createRadialGradient(x,y,0,x,y,r),v=rnd()<.5?0:255;
+  g.addColorStop(0,'rgba('+v+','+v+','+v+','+a+')');g.addColorStop(1,'rgba('+v+','+v+','+v+',0)');c.fillStyle=g;c.fillRect(x-r,y-r,2*r,2*r);}}
+var TX={
+ concrete:tex(512,512,function(c,w,h){c.fillStyle='#c3c5c4';c.fillRect(0,0,w,h);blot(c,w,h,40,.05);noise(c,w,h,9000,.10);c.strokeStyle='rgba(60,60,60,.45)';c.lineWidth=2;c.strokeRect(0,0,w,h);},1/6,1/6),
+ carpet:tex(256,256,function(c,w,h){for(var i=0;i<2;i++)for(var j=0;j<2;j++){c.fillStyle=(i+j)%2?'#7d8894':'#76818d';c.fillRect(i*128,j*128,128,128);}noise(c,w,h,14000,.16);c.strokeStyle='rgba(0,0,0,.18)';c.strokeRect(0,0,128,128);c.strokeRect(128,128,128,128);},1,1),
+ tile:tex(256,256,function(c,w,h){c.fillStyle='#e9ebec';c.fillRect(0,0,w,h);noise(c,w,h,3000,.05);c.strokeStyle='#b4b9bd';c.lineWidth=3;for(var i=0;i<=2;i++){c.beginPath();c.moveTo(i*128,0);c.lineTo(i*128,h);c.moveTo(0,i*128);c.lineTo(w,i*128);c.stroke();}},1/.6,1/.6),
+ raised:tex(256,256,function(c,w,h){c.fillStyle='#b9bfc5';c.fillRect(0,0,w,h);noise(c,w,h,5000,.08);c.strokeStyle='#5e676f';c.lineWidth=4;c.strokeRect(0,0,w,h);},1/.6,1/.6),
+ asphalt:tex(512,512,function(c,w,h){c.fillStyle='#5b6066';c.fillRect(0,0,w,h);blot(c,w,h,30,.06);noise(c,w,h,22000,.22);},1/5,1/5),
+ grass:tex(256,256,function(c,w,h){c.fillStyle='#86a071';c.fillRect(0,0,w,h);noise(c,w,h,26000,.12);},1/3,1/3),
+ panel:tex(256,64,function(c,w,h){c.fillStyle='#d5dbe0';c.fillRect(0,0,w,h);for(var x=0;x<w;x+=32){var g=c.createLinearGradient(x,0,x+32,0);g.addColorStop(0,'rgba(0,0,0,.16)');g.addColorStop(.15,'rgba(255,255,255,.18)');g.addColorStop(.5,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.10)');c.fillStyle=g;c.fillRect(x,0,32,h);}},1,1),
+ carton:tex(256,256,function(c,w,h){c.fillStyle='#c59b6a';c.fillRect(0,0,w,h);blot(c,w,h,14,.05);noise(c,w,h,6000,.08);c.strokeStyle='rgba(60,35,10,.55)';c.lineWidth=3;
+   for(var i=0;i<=2;i++){c.beginPath();c.moveTo(0,i*128);c.lineTo(w,i*128);c.stroke();}for(var j=0;j<2;j++){for(var i=0;i<=2;i++){var x=(i*128+(j?64:0))%256;c.beginPath();c.moveTo(x,j*128);c.lineTo(x,j*128+128);c.stroke();}}
+   c.fillStyle='rgba(240,225,190,.55)';c.fillRect(0,58,w,12);c.fillRect(0,186,w,12);c.fillStyle='rgba(40,40,40,.6)';c.fillRect(20,90,34,22);c.fillRect(150,218,34,22);},1/.8,1/.8),
+ wood:tex(256,256,function(c,w,h){c.fillStyle='#b98d55';c.fillRect(0,0,w,h);for(var i=0;i<60;i++){c.strokeStyle='rgba(70,40,10,'+(.05+rnd()*.12)+')';c.beginPath();var y=rnd()*h;c.moveTo(0,y);c.bezierCurveTo(80,y+rnd()*8-4,170,y+rnd()*8-4,w,y);c.stroke();}c.fillStyle='rgba(0,0,0,.35)';for(var y=0;y<h;y+=42)c.fillRect(0,y,w,3);},1/.8,1/.25),
+ desk:tex(256,256,function(c,w,h){c.fillStyle='#e8e2d6';c.fillRect(0,0,w,h);for(var i=0;i<80;i++){c.strokeStyle='rgba(120,95,60,'+(.04+rnd()*.07)+')';c.beginPath();var y=rnd()*h;c.moveTo(0,y);c.lineTo(w,y+rnd()*6-3);c.stroke();}},1,1),
+ steelPlate:tex(128,128,function(c,w,h){c.fillStyle='#8c949b';c.fillRect(0,0,w,h);c.strokeStyle='rgba(255,255,255,.28)';c.lineWidth=3;for(var i=0;i<4;i++)for(var j=0;j<4;j++){var x=i*32+16,y=j*32+16,d=(i+j)%2?1:-1;c.beginPath();c.moveTo(x-8,y-8*d);c.lineTo(x+8,y+8*d);c.stroke();}},1/.25,1/.25),
+ door:tex(64,256,function(c,w,h){c.fillStyle='#cfd4d8';c.fillRect(0,0,w,h);for(var y=0;y<h;y+=64){c.fillStyle='rgba(0,0,0,.28)';c.fillRect(0,y,w,4);c.fillStyle='rgba(255,255,255,.3)';c.fillRect(0,y+4,w,3);for(var k=10;k<60;k+=9){c.fillStyle='rgba(0,0,0,.06)';c.fillRect(0,y+k,w,2);}}},1,1/2.4),
+ screen:tex(256,160,function(c,w,h){c.fillStyle='#17324d';c.fillRect(0,0,w,h);c.fillStyle='#e9eef3';c.fillRect(10,10,150,105);c.fillStyle='#2b5d8c';c.fillRect(10,10,150,14);c.fillStyle='#b9c6d2';for(var y=34;y<105;y+=10)c.fillRect(18,y,60+rnd()*70,4);c.fillStyle='#f2f5f8';c.fillRect(170,22,76,70);c.fillStyle='#3d8b5a';c.fillRect(178,60,10,24);c.fillRect(194,46,10,38);c.fillRect(210,54,10,30);c.fillRect(226,38,10,46);c.fillStyle='#0f2236';c.fillRect(0,h-16,w,16);})
+};
+TX.screen.wrapS=TX.screen.wrapT=T.ClampToEdgeWrapping;
+
+// ---------- Materiales ----------
+function mat(c,o){o=o||{};var m=new T.MeshStandardMaterial({color:c,roughness:o.r===undefined?.8:o.r,metalness:o.m||0,envMapIntensity:.55});
+  if(o.map)m.map=o.map;if(o.e){m.emissive=new T.Color(o.e);m.emissiveIntensity=o.ei||1;}
+  if(o.o!==undefined){m.transparent=true;m.opacity=o.o;m.depthWrite=false;}if(o.ns||o.o!==undefined)m.userData.ns=true;if(o.side)m.side=o.side;return m;}
+var M={
+ wall:mat(0xf3f2ee,{r:.92}),ext:mat(0xffffff,{map:TX.panel,r:.5,m:.3}),cap:mat(0x39434d),conc:mat(0xa9adaf,{map:TX.concrete}),
+ glass:mat(0x9fc3d6,{r:.05,m:.1,o:.28}),alu:mat(0xbfc5ca,{r:.35,m:.8}),doorWood:mat(0xc9a877,{map:TX.wood,r:.6}),
+ tray:mat(0xaeb6bd,{r:.35,m:.85}),rod:mat(0x8b949c,{r:.4,m:.8}),
+ of:mat(0x8e24aa,{r:.5}),al:mat(0x00838f,{r:.5}),trunk:mat(0xe8590c,{r:.45}),
+ upright:mat(0x1f5fa8,{r:.45,m:.3}),beam:mat(0xe9711c,{r:.45,m:.3}),guard:mat(0xf2c200,{r:.5}),
+ wood:mat(0xffffff,{map:TX.wood,r:.85}),carton:mat(0xffffff,{map:TX.carton,r:.9}),carton2:mat(0xe9dcc6,{map:TX.carton,r:.9}),wrap:mat(0xdfe8ee,{map:TX.carton,r:.25}),cartonB:mat(0x9fb6c9,{map:TX.carton,r:.8}),
+ deskTop:mat(0xffffff,{map:TX.desk,r:.6}),metalLeg:mat(0x9aa2a9,{r:.4,m:.7}),fabric:mat(0x2f3a46,{r:.95}),fabricB:mat(0x1f5f8b,{r:.95}),dark:mat(0x1d2227,{r:.55}),plastic:mat(0x2a2f35,{r:.4}),
+ white:mat(0xf4f5f5,{r:.5}),screen:mat(0xffffff,{map:TX.screen,e:0xffffff,ei:.55,r:.2}),
+ steel:mat(0x7d8b98,{r:.45,m:.6}),steelRed:mat(0xb23a2a,{r:.5,m:.3}),light:mat(0xffffff,{e:0xfff6d8,ei:1.6}),roof:mat(0xb9c7d3,{o:.22,side:T.DoubleSide}),
+ dockDoor:mat(0xffffff,{map:TX.door,r:.5,m:.3}),rubber:mat(0x17191b,{r:.9}),plate:mat(0xffffff,{map:TX.steelPlate,r:.45,m:.6}),yellow:mat(0xf2c200,{r:.6}),
+ truckW:mat(0xf4f6f7,{r:.4,m:.1}),truckB:mat(0x12395c,{r:.35,m:.3}),truckR:mat(0xb3261e,{r:.35,m:.3}),tyre:mat(0x151617,{r:.95}),chrome:mat(0xd9dde0,{r:.2,m:.9}),winD:mat(0x16212b,{r:.08,m:.4}),
+ fork:mat(0xf0a500,{r:.45,m:.2}),plant:mat(0x3f7d45,{r:.9}),pot:mat(0x8a8f94,{r:.7}),red:mat(0xd62828,{r:.5}),zoneRed:mat(0xd62828,{o:.2}),locker:mat(0x6f8fa8,{r:.5,m:.3}),
+ rackFrame:mat(0x14171a,{r:.45,m:.5}),rackSide:mat(0x1a1e22,{r:.5,m:.4}),rail:mat(0xb8bec4,{r:.35,m:.9}),rackGlass:mat(0x7f9aa8,{r:.05,m:.2,o:.18})
+};
+function tinted(map,color,r){return mat(color,{map:map,r:r===undefined?.8:r});}
+
+// ---------- Geometría agrupada por material (una malla por material y capa) ----------
+var unitBox=new T.BoxGeometry(1,1,1).toNonIndexed(),unitCyl=new T.CylinderGeometry(1,1,1,14).toNonIndexed(),unitSph=new T.SphereGeometry(1,12,9).toNonIndexed();
+var batches={},stack=[new T.Matrix4()],_e=new T.Euler(),_q=new T.Quaternion();
+function push(x,y,z,ry){var m=new T.Matrix4().makeRotationY(ry||0);m.setPosition(x,y,z);stack.push(stack[stack.length-1].clone().multiply(m));}
+function pop(){stack.pop();}
+function G(g,m,geo,x,y,z,sx,sy,sz,rx,ry,rz){_q.setFromEuler(_e.set(rx||0,ry||0,rz||0));
+  var mt=new T.Matrix4().compose(new V3(x,y,z),_q,new V3(sx,sy,sz)).premultiply(stack[stack.length-1]);
+  var k=g.uuid+m.uuid;(batches[k]||(batches[k]={g:g,m:m,items:[]})).items.push([geo,mt]);}
+function B(g,m,x,y,z,sx,sy,sz,ry){G(g,m,unitBox,x,y,z,sx,sy,sz,0,ry||0,0);}
+function C(g,m,x,y,z,r,h,rx,rz){G(g,m,unitCyl,x,y,z,r,h,r,rx||0,0,rz||0);}
+function S(g,m,x,y,z,r,sy){G(g,m,unitSph,x,y,z,r,r*(sy||1),r);}
+function seg(g,m,a,b,r){var dx=b[0]-a[0],dy=b[1]-a[1],dz=b[2]-a[2],len=Math.abs(dx)+Math.abs(dy)+Math.abs(dz);if(len<.01)return;
+  C(g,m,(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2,r,len,dz?PI/2:0,dx?PI/2:0);}
+function flush(){Object.keys(batches).forEach(function(k){var b=batches[k],n=0;b.items.forEach(function(i){n+=i[0].attributes.position.count;});
+  var P=new Float32Array(n*3),N=new Float32Array(n*3),U=new Float32Array(n*2),o=0,v=new V3(),nm=new T.Matrix3();
+  b.items.forEach(function(it){var p=it[0].attributes.position,nn=it[0].attributes.normal;nm.getNormalMatrix(it[1]);
+    for(var i=0;i<p.count;i++){v.fromBufferAttribute(p,i).applyMatrix4(it[1]);P[o*3]=v.x;P[o*3+1]=v.y;P[o*3+2]=v.z;var X=v.x,Y=v.y,Z=v.z;
+      v.fromBufferAttribute(nn,i).applyMatrix3(nm).normalize();N[o*3]=v.x;N[o*3+1]=v.y;N[o*3+2]=v.z;
+      var ax=Math.abs(v.x),ay=Math.abs(v.y),az=Math.abs(v.z);
+      if(ay>=ax&&ay>=az){U[o*2]=X;U[o*2+1]=Z;}else if(ax>=az){U[o*2]=Z;U[o*2+1]=Y;}else{U[o*2]=X;U[o*2+1]=Y;}o++;}});
+  var geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(P,3));geo.setAttribute('normal',new T.BufferAttribute(N,3));geo.setAttribute('uv',new T.BufferAttribute(U,2));
+  var mesh=new T.Mesh(geo,b.m);if(!b.m.userData.ns){mesh.castShadow=true;mesh.receiveShadow=true;}b.g.add(mesh);});batches={};}
+var proxyMat=new T.MeshBasicMaterial({visible:false});
+function proxy(g,x,y,z,sx,sy,sz,info){var p=new T.Mesh(new T.BoxGeometry(sx,sy,sz),proxyMat);p.position.set(x,y,z);p.userData.info=info;g.add(p);pick.push(p);return p;}
+function line(g,pts,color,dashed){var geo=new T.BufferGeometry().setFromPoints(pts);
+  var m=dashed?new T.LineDashedMaterial({color:color,dashSize:.5,gapSize:.35}):new T.LineBasicMaterial({color:color});var l=new T.Line(geo,m);if(dashed)l.computeLineDistances();g.add(l);return l;}
+function label(g,text,x,y,z,o){o=o||{};var fs=44,pad=14,cv=document.createElement('canvas'),c=cv.getContext('2d');
+  var font=(o.weight||700)+' '+fs+'px "Barlow Condensed","Arial Narrow",Arial,sans-serif';c.font=font;
+  var w=Math.ceil(c.measureText(text).width)+pad*2,h=fs+pad*1.3;cv.width=w;cv.height=h;c.font=font;c.textBaseline='middle';
+  if(o.bg!==null){c.fillStyle=o.bg||'rgba(255,255,255,.9)';c.beginPath();var r=10;c.moveTo(r,0);c.arcTo(w,0,w,h,r);c.arcTo(w,h,0,h,r);c.arcTo(0,h,0,0,r);c.arcTo(0,0,w,0,r);c.fill();
+    if(o.border){c.strokeStyle=o.border;c.lineWidth=4;c.stroke();}}
+  c.fillStyle=o.color||'#1b2632';c.fillText(text,pad,h/2+2);
+  var tx=new T.CanvasTexture(cv);tx.minFilter=T.LinearFilter;tx.encoding=T.sRGBEncoding;
+  var s=new T.Sprite(new T.SpriteMaterial({map:tx,depthTest:false,transparent:true,toneMapped:false}));
+  var sh=o.size||1.0;s.scale.set(sh*w/h,sh,1);s.userData.bs=[sh*w/h,sh];s.position.set(x,y,z);s.renderOrder=20;if(o.left)s.center.set(0,.5);g.add(s);return s;}
+
+// ---------- Piezas reutilizables ----------
+function span(a,b,gaps){var out=[],c=a;(gaps||[]).slice().sort(function(p,q){return p[0]-q[0];}).forEach(function(gp){if(gp[0]>c)out.push([c,gp[0]]);c=Math.max(c,gp[1]);});if(b>c)out.push([c,b]);return out;}
+var WH=2.7,EH=3.2;
+// tabique interior con huecos de puerta (dintel + hoja abierta)
+function wall(axis,f,a,b,gaps,o){o=o||{};var h=o.h||WH,t=o.t||.1,m=o.m||M.wall;
+  span(a,b,gaps).forEach(function(s){var c=(s[0]+s[1])/2,l=s[1]-s[0];if(axis==='x')B(L.base,m,c,h/2,f,l,h,t);else B(L.base,m,f,h/2,c,t,h,l);});
+  (gaps||[]).forEach(function(gp,i){var c=(gp[0]+gp[1])/2,l=gp[1]-gp[0];if(o.open)return;
+    if(axis==='x')B(L.base,m,c,(h+2.1)/2,f,l,h-2.1,t);else B(L.base,m,f,(h+2.1)/2,c,t,h-2.1,l);
+    if(o.nodoor)return;var sw=(i%2?1:-1)*1.25;
+    if(axis==='x'){push(gp[0],0,f,sw);B(L.base,M.doorWood,l/2,1.04,0,l-.04,2.08,.045);B(L.base,M.alu,l-.12,1.02,.05,.12,.03,.05);pop();}
+    else{push(f,0,gp[0],-PI/2+sw);B(L.base,M.doorWood,l/2,1.04,0,l-.04,2.08,.045);B(L.base,M.alu,l-.12,1.02,.05,.12,.03,.05);pop();}});}
+// fachada con ventanas (antepecho + vidrio + dintel) y huecos libres
+function facade(axis,f,a,b,wins,gaps){var all=(wins||[]).concat(gaps||[]);
+  span(a,b,all).forEach(function(s){var c=(s[0]+s[1])/2,l=s[1]-s[0];if(axis==='x'){B(L.base,M.ext,c,EH/2,f,l,EH,.25);B(L.base,M.cap,c,EH+.02,f,l,.04,.27);}else{B(L.base,M.ext,f,EH/2,c,.25,EH,l);B(L.base,M.cap,f,EH+.02,c,.27,.04,l);}});
+  (wins||[]).forEach(function(w){var c=(w[0]+w[1])/2,l=w[1]-w[0];
+    var parts=[[.45,.9,M.ext,.25],[1.6,1.4,M.glass,.03],[2.75,.9,M.ext,.25],[.92,.05,M.alu,.3],[2.3,.06,M.alu,.1]];
+    parts.forEach(function(p){if(axis==='x')B(L.base,p[2],c,p[0],f,l,p[1],p[3]);else B(L.base,p[2],f,p[0],c,p[3],p[1],l);});
+    for(var k=0;k<=Math.round(l/1.3);k++){var q=w[0]+k*l/Math.round(l/1.3);if(axis==='x')B(L.base,M.alu,q,1.6,f,.05,1.4,.08);else B(L.base,M.alu,f,1.6,q,.08,1.4,.05);}
+    if(axis==='x')B(L.base,M.cap,c,EH+.02,f,l,.04,.27);else B(L.base,M.cap,f,EH+.02,c,.27,.04,l);});}
+function chair(x,z,ry,m){push(x,0,z,ry);B(L.furn,m||M.fabric,0,.47,0,.46,.07,.46);B(L.furn,m||M.fabric,0,.8,.22,.44,.5,.05);C(L.furn,M.metalLeg,0,.24,0,.025,.4);C(L.furn,M.plastic,0,.03,0,.27,.04);B(L.furn,M.plastic,.25,.62,.02,.04,.03,.3);B(L.furn,M.plastic,-.25,.62,.02,.04,.03,.3);pop();}
+function pc(g,x,z,phone){B(g,M.plastic,x,.745,z-.2,.2,.015,.16);B(g,M.plastic,x,.82,z-.21,.04,.14,.03);B(g,M.plastic,x,1.03,z-.2,.54,.33,.025);B(g,M.screen,x,1.03,z-.186,.5,.29,.004);
+  B(g,M.plastic,x,.752,z+.1,.42,.016,.13);B(g,M.plastic,x+.3,.752,z+.1,.06,.02,.1);B(g,M.dark,x+.38,.2,z-.05,.17,.4,.4);
+  if(phone){B(g,M.dark,x-.38,.765,z-.08,.2,.045,.2);B(g,M.plastic,x-.44,.8,z-.08,.06,.03,.2);B(g,M.screen,x-.34,.79,z-.13,.09,.004,.06);}}
+function desk(x,z,ry,o){o=o||{};var w=o.w||1.1;push(x,0,z,ry);B(L.furn,M.deskTop,0,.73,0,w,.03,.7);B(L.furn,M.metalLeg,-w/2+.03,.36,0,.04,.72,.62);B(L.furn,M.metalLeg,w/2-.03,.36,0,.04,.72,.62);B(L.furn,M.deskTop,0,.5,-.33,w-.1,.35,.02);
+  pc(L.furn,0,0,o.phone);pop();chair(x+Math.sin(ry)*.62,z+Math.cos(ry)*.62,ry,o.cm);}
+function plant(x,z){C(L.furn,M.pot,x,.25,z,.2,.5);S(L.furn,M.plant,x,.95,z,.38,1.3);S(L.furn,M.plant,x+.15,.75,z+.1,.25);}
+function pallet(g,x,y,z,ry,load){push(x,y,z,ry||0);B(g,M.wood,0,.07,0,1.2,.14,.8);
+  if(load){var h=.5+rnd()*.95,k=rnd(),m=k<.4?M.carton:k<.6?M.carton2:k<.82?M.wrap:M.cartonB;B(g,m,0,.14+h/2,0,1.14+rnd()*.06,h,.76+rnd()*.06);}pop();}
+function forklift(x,z,ry,loaded){push(x,0,z,ry);var g=L.furn;
+  B(g,M.fork,-.1,.62,0,1.5,.55,1.05);B(g,M.dark,-.75,.75,0,.45,.8,1.08);B(g,M.fork,-.2,1.0,0,.9,.25,.9);B(g,M.fabric,-.25,1.2,0,.45,.12,.5);B(g,M.fabric,-.48,1.5,0,.1,.5,.48);
+  [[-.75,.5],[-.75,-.5],[.55,.5],[.55,-.5]].forEach(function(p){B(g,M.dark,p[0],1.6,p[1],.06,1.25,.06);});B(g,M.dark,-.1,2.22,0,1.42,.06,1.08);
+  [.25,-.25].forEach(function(dz){B(g,M.dark,.78,1.25,dz*1.7,.1,2.4,.1);});B(g,M.dark,.78,2.4,0,.08,.08,.9);B(g,M.dark,.78,.7,0,.06,.06,.9);B(g,M.dark,.86,.55,0,.05,.6,.95);
+  [.22,-.22].forEach(function(dz){B(g,M.steel,1.45,.07,dz,1.15,.045,.11);});
+  [[.5,.48,.3],[.5,-.48,.3],[-.7,.42,.24],[-.7,-.42,.24]].forEach(function(w){C(g,M.tyre,w[0],w[2],w[1],w[2],.22,PI/2);});
+  C(g,M.dark,.12,1.28,0,.02,.35,0,.6);if(loaded)pallet(g,1.5,.1,0,PI/2,true);pop();}
+function truck(z,cabM,full){var g=L.furn,y0=-1.2;push(60.75,y0,z,0);
+  B(g,M.truckW,6.8,1.2+1.35,0,13.6,2.7,2.55);B(g,M.alu,6.8,1.14,0,13.6,.12,2.5);B(g,M.alu,.02,2.55,0,.05,2.7,2.56);B(g,M.steel,6.8,.95,0,12,.22,1.0);
+  B(g,M.steelRed,.2,.55,0,.1,.12,2.4);B(g,M.steel,9.5,.6,0,.1,.8,.1);
+  [1.6,2.95,4.3].forEach(function(x){[1.05,-1.05].forEach(function(dz){C(g,M.tyre,x,.5,dz,.5,.38,PI/2);C(g,M.chrome,x,.5,dz*1.19,.22,.02,PI/2);});});
+  if(full){B(g,cabM,15.1,1.9,0,2.3,2.7,2.5);B(g,cabM,15.1,3.4,0,2.0,.5,2.4);B(g,M.winD,16.26,2.45,0,.04,1.0,2.2);B(g,M.winD,15.4,2.45,1.255,1.0,.8,.03);B(g,M.winD,15.4,2.45,-1.255,1.0,.8,.03);
+    B(g,M.dark,16.2,.75,0,.3,.5,2.5);B(g,M.chrome,16.3,1.25,0,.06,.55,1.5);B(g,M.steel,13.4,.85,0,3.6,.3,1.0);C(g,M.chrome,13.2,.75,1.0,.33,1.1,0,PI/2);
+    [15.6,12.6].forEach(function(x,i){[1.05,-1.05].forEach(function(dz){C(g,M.tyre,x,.5,dz,.5,i?.5:.32,PI/2);C(g,M.chrome,x,.5,dz*1.2,.22,.02,PI/2);});});}
+  else{B(g,M.steel,11.2,.55,.6,.1,1.1,.1);B(g,M.steel,11.2,.55,-.6,.1,1.1,.1);}
+  pop();}
+
+function build(){
+// ====== Terreno ======
+var gm=tinted(TX.grass,0xffffff,1);B(L.base,gm,-55,-.5,20,230.6,.9,340);B(L.base,gm,145,-.5,-76,170,.9,148);B(L.base,gm,145,-.5,116,170,.9,148);
+var am=tinted(TX.asphalt,0xffffff,.95);B(L.base,am,145,-1.25,20,170,.1,44);
+B(L.base,M.conc,60.45,-.63,20,.3,1.26,44);B(L.base,M.conc,96,-.63,-2.15,72,1.26,.3);B(L.base,M.conc,96,-.63,42.15,72,1.26,.3);
+B(L.base,am,25,-.045,46.5,62,.03,7);B(L.base,M.conc,30,-.04,-1.5,64,.03,3);
+proxy(L.base,76,-1.15,20,31,.2,44,{t:'Patio exterior de maniobra',d:[['Tipo','Conceptual, representado parcialmente'],['Maniobra real','≥ 30–35 m'],['Calles de atraque','6 · camión tipo 16,5 × 2,55 m'],['Cota','−1,20 m respecto a la solera (muelle elevado)']]});
+
+// ====== Solera y zonas ======
+B(L.base,M.conc,30,-.1,20,60.5,.2,40.5);
+var rooms=[
+ ['DIRECCIÓN Y GERENCIA',0,0,8,8,'8,0 × 8,0 m · 64 m²',4,'OF-01','c'],
+ ['ADMINISTRACIÓN Y FINANZAS',0,8,8,15,'8,0 × 7,0 m · 56 m²',6,'OF-01','c'],
+ ['VENTAS Y ATENCIÓN AL CLIENTE',0,15,8,24,'8,0 × 9,0 m · 72 m²',7,'OF-01','c'],
+ ['COMPRAS Y OPERACIONES',0,24,8,31,'8,0 × 7,0 m · 56 m²',6,'OF-01','c'],
+ ['RECEPCIÓN',0,31,10,40,'10,0 × 9,0 m · 90 m²',2,'OF-01','t'],
+ ['PASILLO DISTRIBUIDOR',8,0,10,31,'2,0 × 31,0 m',0,'','t',1],
+ ['SALA DE REUNIONES',10,0,18,7,'8,0 × 7,0 m · 56 m²',2,'OF-01','c'],
+ ['DEPARTAMENTO DE TI',10,7,18,13,'8,0 × 6,0 m · 48 m²',3,'OF-01','r'],
+ ['ASEOS MUJERES',10,13,18,16,'8,0 × 3,0 m · 24 m²',0,'','t',1],
+ ['ASEOS HOMBRES',10,16,18,19,'8,0 × 3,0 m · 24 m²',0,'','t',1],
+ ['ZONA COMÚN / OFFICE',10,19,18,26,'8,0 × 7,0 m · 56 m²',1,'OF-01','t'],
+ ['VESTUARIO MUJERES',10,26,14,33,'4,0 × 7,0 m · 28 m²',0,'','t',1],
+ ['VESTUARIO HOMBRES',14,26,18,33,'4,0 × 7,0 m · 28 m²',0,'','t',1],
+ ['VESTÍBULO / ACCESO ALMACÉN',10,33,18,40,'8,0 × 7,0 m · 56 m²',1,'OF-01','t'],
+ ['PASILLO PEATONAL OESTE',18,0,20,29,'2,0 m · vallado',0,'',0x7fbf8a,1],
+ ['ESTANTERÍA PALETIZADA · BLOQUES A Y B',20,0,44,24.5,'Pasillos de rack 3,50 m',0,'',0xffffff,1],
+ ['PASILLO TRANSVERSAL DE CARRETILLAS',20,24.5,44,27.5,'3,00 m',0,'',0xffffff,1],
+ ['PASILLO PEATONAL',18,27.5,44,29,'1,50 m',0,'',0x7fbf8a,1],
+ ['PASILLO PRINCIPAL DE CARRETILLAS',44,0,48,40,'4,00 m · doble sentido',0,'',0xffffff,1],
+ ['PASO PEATONAL',18,29,20,40,'2,0 m',0,'',0x7fbf8a,1],
+ ['ÁREA DE PICKING Y PACKING',20,29,31,40,'11,0 × 11,0 m · 121 m²',6,'AL-01',0xdcd3ea],
+ ['OFICINA DE ALMACÉN',31,29,37,40,'6,0 × 11,0 m · 66 m²',7,'AL-01','c'],
+ ['ASEOS ALMACÉN',37,29,42.5,34,'2 × (2,75 × 5,0 m) · 13,8 m²',0,'','t',1],
+ ['SALA TÉCNICA',37,34,42.5,40,'5,5 × 6,0 m · 33 m²',1,'AL-01','r'],
+ ['PASO PEATONAL SUR',42.5,29,44,40,'1,50 m',0,'',0x7fbf8a,1],
+ ['ZONA DE RECEPCIÓN DE MERCANCÍAS',48,0,60,15,'12,0 × 15,0 m · 180 m²',3,'AL-01',0xcfe3cf],
+ ['ZONA DE MANIOBRA / BUFFER',48,15,60,25,'12,0 × 10,0 m · 120 m²',0,'',0xf3efdc],
+ ['ZONA DE EXPEDICIÓN',48,25,60,40,'12,0 × 15,0 m · 180 m²',5,'AL-01',0xf3dcc0]];
+var floorM={c:tinted(TX.carpet,0xffffff,.95),t:tinted(TX.tile,0xffffff,.35),r:tinted(TX.raised,0xffffff,.5)};
+rooms.forEach(function(r){var m=typeof r[8]==='string'?floorM[r[8]]:(floorM[r[8]]||(floorM[r[8]]=tinted(TX.concrete,r[8],.55)));
+  B(L.base,m,(r[1]+r[3])/2,.005,(r[2]+r[4])/2,r[3]-r[1],.03,r[4]-r[2]);
+  var d=[['Dimensiones',r[5]]];if(r[6]){d.push(['TO dobles',r[6]+' ('+r[6]*2+' RJ45)']);d.push(['Rack',r[7]]);}else d.push(['Tomas','Sin tomas de red']);
+  proxy(L.base,(r[1]+r[3])/2,.01,(r[2]+r[4])/2,r[3]-r[1],.04,r[4]-r[2],{t:r[0].charAt(0)+r[0].slice(1).toLowerCase(),d:d});
+  if(!r[9])label(L.labels,r[0],(r[1]+r[3])/2,(r[1]>=18?3.6:3.9),(r[2]+r[4])/2,{size:r[1]>=18?1.0:.9});});
+// pintura vial
+var ym=mat(0xf2c200,{r:.6,ns:1}),wm=mat(0xf5f5f5,{r:.6,ns:1});
+[[44.05,0,44.05,40],[47.95,0,47.95,40]].forEach(function(s){B(L.base,ym,s[0],.022,20,.12,.004,40);});
+[24.5,27.5].forEach(function(z){B(L.base,ym,32,.022,z,24,.004,.12);});
+for(var z=1;z<40;z+=3)B(L.base,wm,46,.022,z,.1,.004,1.5);
+for(var x=18.3;x<20;x+=.5)for(var k=0;k<2;k++)B(L.base,wm,x+.1,.023,k?28.25:36.9,.25,.004,k?1.3:1.6);
+for(var z=29.3;z<34;z+=.6)B(L.base,wm,43.25,.023,z+.15,1.2,.004,.3);
+[[20.2,29.5],[33,42.3]].forEach(function(b){[0.45,1.75,5.0,7.4,11.0,13.4,17.0,19.4,22.75,24.05].forEach(function(z){B(L.base,ym,(b[0]+b[1])/2,.022,z,b[1]-b[0],.004,.08);});});
+[[48,15],[48,25]].forEach(function(p){B(L.base,ym,54,.022,p[1],12,.004,.12);});
+label(L.labels,'PASILLO PRINCIPAL DE CARRETILLAS · 4,00 m',46,1.4,10,{size:.75,color:'#6b4e00',bg:'rgba(255,244,200,.92)'});
+
+// ====== Fachadas y tabiques ======
+var docksZ=[3,7.5,12,28,32.5,37];
+facade('x',0,0,60,[[1.5,6.5],[11.5,16.5]],[[8.3,9.7],[18.3,19.7]]);
+facade('x',40,0,60,[[.8,3.4],[6.6,9.4],[11,13.5],[32,36]],[[4,6],[42.7,43.8]]);
+facade('z',0,0,40,[[1.5,6.5],[9,14],[16.5,22.5],[25,30],[32.5,38]],[]);
+facade('z',60,0,40,[],docksZ.map(function(z){return[z-1.5,z+1.5];}));
+// puerta principal acristalada y puertas de emergencia
+B(L.base,M.glass,5,1.2,40,2,2.4,.04);B(L.base,M.alu,5,2.42,40,2.1,.06,.1);B(L.base,M.alu,5,1.2,40,.05,2.4,.08);B(L.base,M.ext,5,2.85,40,2,.7,.25);
+[[9,0],[19,0],[43.25,40]].forEach(function(p){B(L.base,M.steel,p[0],1.05,p[1],1.3,2.1,.06);B(L.base,M.ext,p[0],2.65,p[1],1.4,1.1,.25);B(L.base,M.red,p[0],1.1,p[1]+(p[1]?-.05:.05),.9,.05,.04);});
+wall('z',8,0,31,[[6,6.95],[13,13.95],[21.5,22.45],[28.5,29.45]]);
+wall('z',10,0,31,[[5,5.95],[11,11.95],[14,14.9],[17,17.9],[21,22.2],[27,27.9]]);
+wall('z',10,31,40,[[31,33],[35,36.6]],{open:1});B(L.base,M.wall,10,2.4,32,.1,.6,2);B(L.base,M.wall,10,2.4,35.8,.1,.6,1.6);
+wall('z',18,0,40,[[36,37.6]],{t:.2,h:EH});
+[8,15,24,31].forEach(function(z){wall('x',z,0,8,[]);});
+[7,13,16,19,26].forEach(function(z){wall('x',z,10,18,[]);});
+wall('x',33,10,18,[[11,11.9],[15,15.9]]);wall('z',14,26,33,[]);
+wall('z',31,29,40,[[33,33.95]]);wall('x',29,31,42.5,[[35.6,36.55],[38,38.9],[40.6,41.5]]);
+wall('z',37,29,40,[[36.2,37.15]]);wall('z',42.5,29,40,[[37.6,38.55]],{m:M.wall});wall('z',39.75,29,34,[]);wall('x',34,37,42.5,[]);
+// vidrio de la oficina de almacén hacia el picking
+B(L.base,M.glass,31,1.6,37,.03,1.2,3.5);
+// puesto de control de muelles
+[[50,25.5,4,.06],[50,29,4,.06]].forEach(function(w){B(L.base,M.wall,w[0],.5,w[1],w[2],1,w[3]);B(L.base,M.glass,w[0],1.6,w[1],w[2],1.2,.03);});
+[[48],[52]].forEach(function(x){B(L.base,M.wall,x[0],.5,27.25,.06,1,3.5);B(L.base,M.glass,x[0],1.6,27.25,.03,1.2,3.5);});
+[[48,25.5],[52,25.5],[48,29],[52,29]].forEach(function(p){B(L.base,M.alu,p[0],1.1,p[1],.08,2.2,.08);});
+label(L.labels,'PUESTO CONTROL MUELLES',50,2.9,27.2,{size:.7});
+// vallado peatonal y bolardos
+for(var vz=.4;vz<27.4;vz+=1.5){C(L.base,M.guard,20,.55,vz,.03,1.1);}
+B(L.base,M.guard,20,1.07,13.9,.05,.05,27);B(L.base,M.guard,20,.6,13.9,.04,.04,27);
+for(var vx=20.5;vx<43.6;vx+=1.5)C(L.base,M.guard,vx,.55,29,.03,1.1);B(L.base,M.guard,31.9,1.07,29,22.8,.05,.05);
+[['SE-1',9,-1.2],['SE-3',19,-1.2],['SE-2 · ACCESO PRINCIPAL',5,41.4],['SE-4',43.25,41.4]].forEach(function(a){label(L.labels,a[0],a[1],2.9,a[2],{size:.75,color:'#fff',bg:'#2e7d32'});});
+
+// ====== Estructura metálica y luminarias ======
+for(var px=18;px<=60;px+=6){[.45,39.55].forEach(function(z){B(L.struct,M.steel,px===18?18.35:px===60?59.6:px,4.4,z,.3,8.8,.3);});
+  var X=px===18?18.35:px===60?59.6:px;G(L.struct,M.steel,unitBox,X,9.42,10.2,.22,.5,19.7,-.065,0,0);G(L.struct,M.steel,unitBox,X,9.42,29.8,.22,.5,19.7,.065,0,0);}
+[2,7,12,17,23,28,33,38].forEach(function(z){var y=8.8+(z<20?z:40-z)*.065+.42;B(L.struct,M.steel,39,y,z,41.5,.14,.08);});
+for(var lx=24;lx<60;lx+=8)[6.5,15.5,26,35].forEach(function(z){C(L.struct,M.rod,lx,8.6,z,.01,1.2);C(L.struct,M.dark,lx,7.95,z,.24,.14);C(L.struct,M.light,lx,7.87,z,.21,.02);});
+// fachada alta y cubierta (capa opcional)
+B(L.shell,M.roof,30,6.1,0,60,5.8,.25);B(L.shell,M.roof,30,6.1,40,60,5.8,.25);B(L.shell,M.roof,0,6.1,20,.25,5.8,40);B(L.shell,M.roof,60,6.1,20,.25,5.8,40);
+G(L.shell,M.roof,unitBox,30,9.75,10,60.6,.08,20.2,-.065,0,0);G(L.shell,M.roof,unitBox,30,9.75,30,60.6,.08,20.2,.065,0,0);
+B(L.shell,mat(0xffffff,{o:.3}),9,3.0,20,18,.06,40);
+
+// ====== Muelles y camiones ======
+docksZ.forEach(function(z,i){var busy=(i===1||i===4||i===5);
+  B(L.base,M.rubber,60.55,1.7,z-1.75,.6,3.4,.3);B(L.base,M.rubber,60.55,1.7,z+1.75,.6,3.4,.3);B(L.base,M.rubber,60.55,3.25,z,.6,.5,3.8);
+  B(L.base,M.yellow,60.3,.0,z-1.3,.12,.5,.25);B(L.base,M.yellow,60.3,.0,z+1.3,.12,.5,.25);
+  if(busy){B(L.base,M.dockDoor,59.95,2.9,z,.06,.6,3);}else B(L.base,M.dockDoor,59.95,1.6,z,.06,3.2,3);
+  B(L.base,M.plate,58.9,.025,z,2.2,.02,2.2);B(L.base,M.yellow,57.75,.024,z,.1,.02,2.3);B(L.base,M.yellow,58.9,.024,z-1.13,2.2,.02,.07);B(L.base,M.yellow,58.9,.024,z+1.13,2.2,.02,.07);
+  C(L.base,M.guard,59.6,.5,z-1.7,.07,1);C(L.base,M.guard,59.6,.5,z+1.7,.07,1);
+  B(L.base,wm,74,-1.19,z-1.9,26,.01,.1);B(L.base,wm,74,-1.19,z+1.9,26,.01,.1);
+  label(L.labels,'M-0'+(i+1),60.6,4.3,z,{size:.8,color:'#fff',bg:'#3a4653'});});
+truck(7.5,M.truckB,true);truck(32.5,M.truckR,true);truck(37,M.truckB,false);
+
+// ====== Estanterías paletizadas ======
+var rackInfo={t:'Estantería paletizada',d:[['Bloques','A y B · filas E-01 a E-05'],['Pasillo de rack','3,50 m'],['Altura representada','6,2 m, 4 niveles (hipótesis)'],['Cableado','Ninguna TO sobre estanterías']]};
+function pallRack(x1,x2,zc,dbl,name){var depths=dbl?[zc-.65,zc+.65]:[zc],H=6.2,n=Math.round((x2-x1)/2.8),bw=(x2-x1)/n,g=L.racks;
+  depths.forEach(function(z){
+    for(var i=0;i<=n;i++){var x=x1+i*bw;[-.5,.5].forEach(function(dz){B(g,M.upright,x,H/2,z+dz,.1,H,.08);B(g,M.steel,x,.006,z+dz,.16,.012,.14);});
+      for(var y=.3;y<H-.8;y+=1.2){B(g,M.upright,x,y,z,.04,.04,1.0);G(g,M.upright,unitBox,x,y+.6,z,.035,.035,1.55,(Math.round(y/1.2)%2?1:-1)*.87,0,0);}
+      B(g,M.guard,x,.2,z-.58,.16,.4,.06);B(g,M.guard,x,.2,z+.58,.16,.4,.06);}
+    [0,1.75,3.5,5.25].forEach(function(y,li){
+      if(li>0)[-.5,.5].forEach(function(dz){B(g,M.beam,(x1+x2)/2,y-.06,z+dz,x2-x1-.1,.12,.05);});
+      for(var i=0;i<n;i++)for(var k=0;k<3;k++){if(rnd()<.13)continue;pallet(g,x1+i*bw+bw*(.19+k*.31),y,z,PI/2,rnd()>.06);}});});
+  proxy(L.racks,(x1+x2)/2,3.1,zc,x2-x1,6.2,dbl?2.5:1.2,rackInfo);
+  B(L.racks,M.guard,x1-.25,.2,zc,.12,.4,dbl?2.5:1.2);B(L.racks,M.guard,x2+.25,.2,zc,.12,.4,dbl?2.5:1.2);
+  label(L.labels,name,(x1+x2)/2,7.2,zc,{size:.8,bg:'rgba(255,255,255,.82)'});}
+[[1.1,0,'E-01'],[6.2,1,'E-02'],[12.2,1,'E-03'],[18.2,1,'E-04'],[23.4,0,'E-05']].forEach(function(r){pallRack(20.4,29.4,r[0],r[1],r[2]+'A');pallRack(33.1,42.1,r[0],r[1],r[2]+'B');});
+// mercancía en playa, carretillas y transpaletas
+[[50,2],[50,4],[52,2],[52,4],[54,10],[56,10],[50,12],[55,3],[50,7]].forEach(function(p){pallet(L.furn,p[0],.03,p[1],rnd()*.2,true);});
+[[51,32],[53,32],[55,32],[51,34.5],[53,34.5],[51,37],[53,37],[55,37],[56.5,29.5]].forEach(function(p){pallet(L.furn,p[0],.03,p[1],PI/2+rnd()*.1,true);});
+[[50,18],[51.4,18],[50,19.2]].forEach(function(p){for(var k=0;k<5;k++)pallet(L.furn,p[0],.03+k*.145,p[1],rnd()*.06,false);});
+forklift(46,19,-PI/2,true);forklift(36,26,0,true);forklift(55.5,21.5,2.3,false);
+
+// ====== Mobiliario de oficinas ======
+var g=L.furn;
+// reuniones
+B(g,M.deskTop,14,.74,3.5,4.4,.04,1.5);B(g,M.metalLeg,12.4,.36,3.5,.08,.72,1.0);B(g,M.metalLeg,15.6,.36,3.5,.08,.72,1.0);
+for(var c=0;c<5;c++){chair(12.2+c*.9,2.35,PI,M.fabricB);chair(12.2+c*.9,4.65,0,M.fabricB);}
+B(g,M.plastic,17.9,1.6,3.5,.05,1.1,1.9);B(g,M.screen,17.87,1.6,3.5,.01,1.0,1.8);plant(10.6,.6);
+// dirección
+desk(4,2.2,0,{w:1.8,phone:1});chair(3.4,4,0,M.fabricB);chair(4.6,4,0,M.fabricB);B(g,M.deskTop,6.6,.4,6.8,1.8,.8,.45);B(g,M.fabricB,1.6,.4,6.2,.8,.45,2.0);B(g,M.fabricB,1.28,.75,6.2,.16,.4,2.0);plant(7.3,.7);
+// zona común / office
+B(g,M.white,17.6,.45,22.5,.6,.9,5.5);B(g,M.dark,17.6,.92,22.5,.62,.04,5.5);B(g,M.alu,17.55,1.45,25.3,.7,1.9,.7);B(g,M.plastic,17.6,1.12,21,.3,.35,.3);B(g,M.plastic,17.6,1.1,23,.45,.3,.35);
+[[12.5,21.2],[12.5,24]].forEach(function(p){C(g,M.deskTop,p[0],.74,p[1],.6,.04);C(g,M.metalLeg,p[0],.37,p[1],.04,.72);for(var k=0;k<4;k++)chair(p[0]+Math.cos(k*PI/2)*.85,p[1]+Math.sin(k*PI/2)*.85,PI/2-k*PI/2+PI,M.fabric);});
+B(g,M.truckR,10.5,.95,25.4,.8,1.9,.8);B(g,M.winD,10.92,1.2,25.4,.02,1.1,.6);
+// aseos y vestuarios
+[[13,16,-1],[16,19,1]].forEach(function(r){var zc=(r[0]+r[1])/2;for(var k=0;k<3;k++){var x=15.2+k*.95;B(g,M.white,x-.47,1.05,r[1]-.75,.03,2.0,1.4);B(g,M.white,x,.2,r[1]-.4,.38,.4,.55);B(g,M.white,x,.6,r[1]-.2,.38,.4,.16);B(g,M.locker,x,1.05,r[1]-1.45,.9,2.0,.03);}
+  B(g,M.white,12,.85,r[0]+.35,2.6,.12,.5);B(g,M.winD,12,1.5,r[0]+.08,2.6,.8,.02);[11.2,12,12.8].forEach(function(x){C(g,M.alu,x,.98,r[0]+.2,.015,.14);});});
+[[10,14],[14,18]].forEach(function(r){for(var k=0;k<8;k++){B(g,M.locker,r[0]+.4,.95,26.5+k*.75,.5,1.9,.72);B(g,M.dark,r[0]+.66,1.3,26.5+k*.75,.01,.12,.3);}B(g,M.wood,r[0]+2.2,.42,29.5,.4,.06,4.5);B(g,M.metalLeg,r[0]+2.2,.2,27.6,.3,.4,.05);B(g,M.metalLeg,r[0]+2.2,.2,31.4,.3,.4,.05);});
+// recepción y vestíbulo
+B(g,M.deskTop,1.6,.55,35.2,.7,1.1,3.4);B(g,M.white,2.0,.6,35.2,.06,1.2,3.5);B(g,M.deskTop,1.0,1.12,35.2,.5,.04,3.4);
+B(g,M.fabricB,7.5,.4,38.6,2.2,.45,.8);B(g,M.fabricB,7.5,.75,38.95,2.2,.4,.16);B(g,M.fabricB,9.2,.4,36.4,.8,.45,1.8);C(g,M.deskTop,7.6,.4,37.2,.45,.04);C(g,M.metalLeg,7.6,.2,37.2,.03,.4);plant(.7,39.2);plant(9.3,31.7);plant(.7,31.7);
+B(g,M.locker,17.6,1.0,34.8,.5,2.0,2.4);plant(10.7,39.3);
+// almacén: mesas de packing con rodillos
+[[22.5,32.5],[25.5,32.5],[28.5,32.5],[22.5,36.3],[25.5,36.3],[28.5,36.3]].forEach(function(p,i){push(p[0],0,p[1],0);
+  B(g,M.deskTop,0,.9,0,1.9,.04,.9);[[-.9,-.4],[-.9,.4],[.9,-.4],[.9,.4]].forEach(function(l){B(g,M.metalLeg,l[0],.45,l[1],.05,.9,.05);});B(g,M.metalLeg,0,.25,0,1.8,.03,.8);
+  B(g,M.metalLeg,-.9,1.5,-.42,.05,1.2,.05);B(g,M.metalLeg,.9,1.5,-.42,.05,1.2,.05);B(g,M.deskTop,0,1.75,-.3,1.9,.03,.35);
+  B(g,M.carton,.55,1.06,.05,.4,.28,.35);B(g,M.carton2,-.6,1.0,.1,.3,.18,.3);B(g,M.carton,-.3,1.9,-.3,.9,.25,.3);
+  if(i%2===0){B(g,M.plastic,.1,1.2,-.3,.45,.3,.03);B(g,M.screen,.1,1.2,-.284,.42,.26,.004);B(g,M.plastic,.1,.93,.1,.38,.016,.12);B(g,M.dark,-.15,.98,-.2,.2,.14,.22);}
+  pop();});
+B(g,M.metalLeg,25.5,.7,34.4,9.5,.06,.06);B(g,M.metalLeg,25.5,.7,35.0,9.5,.06,.06);for(var rx=20.9;rx<30.2;rx+=.16)C(g,M.alu,rx,.72,34.7,.03,.56,PI/2);
+for(var lx=21.5;lx<30;lx+=2)[34.43,34.97].forEach(function(z){B(g,M.metalLeg,lx,.35,z,.05,.7,.05);});
+[[23,34.7],[26.3,34.7],[28.2,34.7]].forEach(function(p){B(g,M.carton,p[0],.92,p[1],.45,.32,.4);});
+B(g,M.deskTop,50,.9,28.55,3.2,.04,.7);B(g,M.metalLeg,48.5,.45,28.55,.05,.9,.6);B(g,M.metalLeg,51.5,.45,28.55,.05,.9,.6);
+push(49.4,.17,28.6,PI);pc(g,0,0,true);pop();push(50.8,.17,28.6,PI);pc(g,0,0,false);pop();chair(49.4,27.8,PI,M.fabric);chair(50.8,27.8,PI,M.fabric);
+// salas de comunicaciones: clima, cuadro eléctrico, extintor
+B(g,M.white,14.5,2.3,7.2,1.0,.3,.24);B(g,M.alu,10.2,1.5,9,.14,.8,.6);C(g,M.red,17.7,.45,12.6,.08,.55);
+B(g,M.deskTop,11,.9,8.3,.8,.04,2.2);B(g,M.metalLeg,11,.45,7.3,.7,.9,.05);B(g,M.metalLeg,11,.45,9.3,.7,.9,.05);B(g,M.dark,11,1.0,8,.4,.16,.5);B(g,M.carton,11,.25,8.5,.5,.4,.6);
+B(g,M.white,39.6,2.3,39.8,1.1,.3,.24);B(g,M.white,37.25,1.2,35,.3,2.0,.7);B(g,M.alu,37.15,1.5,38.6,.14,.9,.7);C(g,M.red,42.2,.45,39.6,.08,.55);C(g,M.red,42.2,.45,34.4,.08,.55);
+B(L.base,M.zoneRed,15.5,.03,9.5,1.0,.01,1.6);B(L.base,M.zoneRed,40,.03,37,1.0,.01,1.8);
+[[38.5,38.5],[39.5,38.5]].forEach(function(p){});
+line(L.base,[new V3(38.5,.04,37.7),new V3(39.5,.04,37.7),new V3(39.5,.04,38.5),new V3(38.5,.04,38.5),new V3(38.5,.04,37.7)],0xd49a00,true);
+label(L.labels,'HUECO RACK DE RESERVA',39,.5,38.1,{size:.3,color:'#6b4e00',bg:'rgba(255,244,200,.92)'});
+// acometida de operadores
+B(L.base,M.conc,40.5,.0,41.4,.9,.12,.9);B(L.base,M.plate,40.5,.065,41.4,.7,.01,.7);
+label(L.labels,'ACOMETIDA OPERADORES · 2 × tubo Ø63 enterrado',40.5,1.0,42.6,{size:.6});
+
+// ====== Bandejas ======
+var traysOF=[
+ {id:'B-O2',a:[9,1],b:[9,34.6],h:2.7,w:.2,rec:'Pasillo distribuidor',sec:'200×60',len:'33,6 m',cab:38,oc:'14,4 %'},
+ {id:'B-O1',a:[9,9.5],b:[18,9.5],h:2.7,w:.2,rec:'Dpto. TI → pasillo',sec:'200×60',len:'11,4 m',cab:64,oc:'24,2 %'}];
+var traysAL=[
+ {id:'B-A1',a:[39,37],b:[43.25,37],h:6,w:.3,rec:'Sala técnica → pasillo sur',sec:'300×60',len:'3,8 m',cab:33,oc:'8,2 %'},
+ {id:'B-A2',a:[43.25,37],b:[43.25,28.25],h:6,w:.3,rec:'Pasillo peatonal sur',sec:'300×60',len:'9,2 m',cab:33,oc:'8,2 %'},
+ {id:'B-A3',a:[18.6,28.25],b:[59.4,28.25],h:6,w:.3,rec:'Pasillo central → muelles',sec:'300×60',len:'40,9 m',cab:16,oc:'4,0 %'},
+ {id:'B-A4',a:[59.4,1.5],b:[59.4,38.5],h:6,w:.3,rec:'Frente de muelles',sec:'300×60',len:'37,0 m',cab:6,oc:'1,5 %'},
+ {id:'B-A5',a:[18.6,9.5],b:[18.6,28.25],h:6,w:.3,rec:'Troncal pasillo oeste → OF-01',sec:'300×60',len:'19,7 m',cab:0,oc:'0,7 %',cabTxt:3},
+ {id:'D-AL',a:[34,28.25],b:[34,38.6],h:6,w:.12,rec:'Derivación oficina de almacén',sec:'100×60',len:'35,3 m (total D-AL)',cab:14,oc:'10,6 %'},
+ {id:'D-AL',a:[25.5,28.25],b:[25.5,36.3],h:6,w:.12,rec:'Derivación picking y packing',sec:'100×60',len:'35,3 m (total D-AL)',cab:14,oc:'10,6 %',nolabel:1}];
+function tray(t,cm,cg){var ax=t.a[0],az=t.a[1],bx=t.b[0],bz=t.b[1],alongX=Math.abs(bx-ax)>.01,len=alongX?Math.abs(bx-ax):Math.abs(bz-az),cx=(ax+bx)/2,cz=(az+bz)/2,g=L.trays,w=t.w;
+  [-1,1].forEach(function(s){if(alongX)B(g,M.tray,cx,t.h+.03,cz+s*w/2,len,.06,.008);else B(g,M.tray,cx+s*w/2,t.h+.03,cz,.008,.06,len);});
+  var n=Math.round(len/.3);for(var i=0;i<=n;i++){var f=i/n;if(alongX)B(g,M.tray,ax+(bx-ax)*f,t.h+.006,cz,.02,.012,w);else B(g,M.tray,cx,t.h+.006,az+(bz-az)*f,w,.012,.02);}
+  var ns=Math.max(1,Math.round(len/2.4)),top=t.h===6?8.9:3.0;for(var i=0;i<=ns;i++){var f=i/ns,x=ax+(bx-ax)*f,z=az+(bz-az)*f;[-1,1].forEach(function(s){C(g,M.rod,alongX?x:x+s*w/2,(t.h+top)/2,alongX?z+s*w/2:z,.006,top-t.h);});
+    if(alongX)B(g,M.rod,x,t.h-.012,z,.03,.02,w+.06);else B(g,M.rod,x,t.h-.012,z,w+.06,.02,.03);}
+  var nb=Math.min(6,Math.ceil(t.cab/9));for(var k=0;k<nb;k++){var off=(k-(nb-1)/2)*(w*.7/Math.max(1,nb)),r=.016+(k%2)*.004;
+    if(alongX)C(cg,cm,cx,t.h+.03+(k%2)*.012,cz+off,r,len,0,PI/2);else C(cg,cm,cx+off,t.h+.03+(k%2)*.012,cz,r,len,PI/2,0);}
+  proxy(L.trays,cx,t.h+.03,cz,alongX?len:w+.15,.25,alongX?w+.15:len,{t:'Bandeja '+t.id,d:[['Recorrido',t.rec],['Sección',t.sec+' mm'],['Longitud',t.len],['Cables',t.cabTxt||t.cab],['Ocupación',t.oc+' (máx. admitida 40 %)'],['Altura',(t.h===6?'+6,00 m (nave)':'+2,70 m (techo oficinas)')]]});
+  if(!t.nolabel)label(L.labels,t.id,cx,t.h+.7,cz,{size:.62,border:'#6b7f8e'});}
+traysOF.forEach(function(t){tray(t,M.of,L.hof);});traysAL.forEach(function(t){tray(t,M.al,L.hal);});
+// subida de techo de oficinas a nave y bajada a AL-01 (escalera vertical)
+[[18.3,2.7,6,9.5],[39,2.05,6,37]].forEach(function(v){[-.15,.15].forEach(function(s){B(L.trays,M.tray,v[0],(v[1]+v[2])/2,v[3]+s,.06,v[2]-v[1],.008);});for(var y=v[1];y<v[2];y+=.3)B(L.trays,M.tray,v[0],y,v[3],.012,.02,.3);});
+[[16.5,2.05,2.7,9.5]].forEach(function(v){[-.1,.1].forEach(function(s){B(L.trays,M.tray,v[0],(v[1]+v[2])/2,v[3]+s,.06,v[2]-v[1],.008);});});
+C(L.hof,M.of,16.5,2.38,9.46,.05,.66);C(L.hal,M.al,39.05,4.0,36.95,.06,3.9);
+
+// ====== Sellados cortafuegos ======
+[[18,2.73,9.5,.24,.2,.34],[37,2.4,36.2,.14,.3,.3],[42.5,2.55,37,.14,.3,.4]].forEach(function(p){B(L.trunk,M.red,p[0],p[1],p[2],p[3],p[4],p[5]);
+  proxy(L.trunk,p[0],p[1],p[2],.5,.5,.5,{t:'Sellado cortafuegos (SC)',d:[['Función','Cruce de sector / sala técnica'],['Total en plano','3 cruces sellados']]});
+  label(L.labels,'SC',p[0],p[1]+.55,p[2],{size:.45,color:'#fff',bg:'#d62828'});});
+
+// ====== Troncal ======
+var tk=[[16.56,2.05,9.56],[16.56,2.76,9.56],[18.6,2.76,9.56],[18.6,6.06,9.56],[18.6,6.06,28.3],[43.3,6.06,28.3],[43.3,6.06,37.05],[39.1,6.06,37.05],[39.1,2.05,37.05]];
+var tkInfo={t:'Troncal AL-01 ↔ OF-01',d:[['Fibra','OM4 12F LC · 6 enlaces dúplex · 72,0 m'],['Cobre','2 × Cat6A · 68,0 m (≤ 90 m)'],['Recorrido','B-A1 / A2 / A3 / A5 · 57,2 m'],['Topología','Estrella jerárquica: AL-01 distribuidor de edificio, OF-01 de planta']]};
+for(var i=0;i<tk.length-1;i++){var a=tk[i],b=tk[i+1];seg(L.trunk,M.trunk,a,b,.045);S(L.trunk,M.trunk,b[0],b[1],b[2],.045);
+  proxy(L.trunk,(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2,Math.abs(b[0]-a[0])+.4,Math.abs(b[1]-a[1])+.4,Math.abs(b[2]-a[2])+.4,tkInfo);}
+label(L.labels,'TRONCAL OM4 12F + 2×Cat6A · 72 m',30,7,28.25,{size:.8,color:'#fff',bg:'#e8590c'});
+
+// ====== Tomas y cableado horizontal ======
+function along(n,x1,z1,x2,z2){var o=[];for(var i=0;i<n;i++){var f=n===1?.5:i/(n-1);o.push([x1+(x2-x1)*f,z1+(z2-z1)*f]);}return o;}
+function nearest(p,trays){var best=null,bd=1e9;trays.forEach(function(t){var x=Math.min(Math.max(p[0],Math.min(t.a[0],t.b[0])),Math.max(t.a[0],t.b[0])),z=Math.min(Math.max(p[1],Math.min(t.a[1],t.b[1])),Math.max(t.a[1],t.b[1]));
+  var d=Math.abs(p[0]-x)+Math.abs(p[1]-z);if(d<bd){bd=d;best=[x,z,t.h];}});return best;}
+// n = normal de la pared (hacia la sala); pole = bajante por columna de servicio
+function outlets(pts,trays,m,g,prefix,start,nrm,pole){pts.forEach(function(p,i){var q=nearest(p,trays),h=q[2]+.05,y0=pole?1.05:.4,nx=nrm[0],nz=nrm[1];
+  var fx=p[0]+nx*.012,fz=p[1]+nz*.012;
+  B(L.to,M.white,fx,y0,fz,nx?.012:.16,.09,nz?.012:.16);B(L.to,m,fx,y0+.06,fz,nx?.013:.16,.02,nz?.013:.16);
+  [-.035,.035].forEach(function(o){B(L.to,M.dark,fx+nx*.004+(nz?o:0),y0-.005,fz+nz*.004+(nx?o:0),nx?.008:.028,.03,nz?.008:.028);});
+  if(pole){C(L.to,M.alu,p[0],h/2,p[1],.035,h);}else B(L.to,M.white,p[0]+nx*.02,(y0+Math.min(h,WH))/2,p[1]+nz*.02,nx?.03:.06,Math.min(h,WH)-y0,nz?.03:.06);
+  proxy(L.to,p[0],y0,p[1],.5,.5,.5,{t:'Toma doble '+prefix+'-'+('0'+(start+i)).slice(-2),d:[['Tipo','TO doble 2 × RJ45 Cat6A U/FTP Clase EA'],['Rack',prefix==='O'?'OF-01':'AL-01'],['Posición','Aproximada (concepto)']]});
+  var cx=p[0]+nx*.06,cz=p[1]+nz*.06,r=.022;
+  seg(g,m,[cx,y0,cz],[cx,h,cz],r);seg(g,m,[cx,h,cz],[q[0],h,cz],r);seg(g,m,[q[0],h,cz],[q[0],h,q[1]],r);});}
+var W0=.14;
+var ofW=[].concat(along(4,W0,1.6,W0,6.4),along(6,W0,8.7,W0,14.3),along(7,W0,15.7,W0,23.3),along(6,W0,24.7,W0,30.3));
+outlets(ofW,traysOF,M.of,L.hof,'O',1,[1,0]);
+ofW.slice(4).forEach(function(p,i){desk(.62,p[1],PI/2,{phone:i%3===0,cm:i%2?M.fabric:M.fabricB});});
+outlets(along(2,W0,34.4,W0,36.2),traysOF,M.of,L.hof,'O',24,[1,0]);push(1.25,.38,34.6,PI/2);pc(L.furn,0,0,true);pop();push(1.25,.38,36,PI/2);pc(L.furn,0,0,false);pop();chair(.75,34.6,-PI/2,M.fabric);
+outlets(along(2,12.5,W0,15.5,W0),traysOF,M.of,L.hof,'O',26,[0,1]);
+var tiP=along(3,11.6,12.9,14.6,12.9);outlets(tiP,traysOF,M.of,L.hof,'O',28,[0,-1]);tiP.forEach(function(p){desk(p[0],12.45,PI,{phone:0});});
+outlets([[17.86,24.4]],traysOF,M.of,L.hof,'O',31,[-1,0]);outlets([[14,39.84]],traysOF,M.of,L.hof,'O',32,[0,-1]);
+var alW=along(4,31.08,30.6,31.08,35),alE=along(3,36.92,30.4,36.92,35.2);
+outlets(alW,traysAL,M.al,L.hal,'A',1,[1,0]);outlets(alE,traysAL,M.al,L.hal,'A',5,[-1,0]);
+alW.forEach(function(p,i){desk(31.56,p[1],PI/2,{phone:i===0});});alE.forEach(function(p){desk(36.44,p[1],-PI/2,{});});
+outlets([[21.5,32.1],[24.5,32.1],[27.5,32.1],[21.5,35.9],[24.5,35.9],[27.5,35.9]],traysAL,M.al,L.hal,'A',8,[0,1],true);
+outlets([[49.4,28.92],[50.8,28.92]],traysAL,M.al,L.hal,'A',14,[0,-1],true);
+outlets([[59.86,5.2],[59.86,9.7],[59.86,14.2],[59.86,30.2],[59.86,34.7],[59.86,38.9]],traysAL,M.al,L.hal,'A',16,[-1,0]);
+outlets([[41.5,39.86]],traysAL,M.al,L.hal,'A',22,[0,-1]);
+// AP-01 bajo bandeja del pasillo
+C(L.to,M.white,9,2.62,24,.11,.04);C(L.to,M.rod,9,2.67,24,.01,.06);
+proxy(L.to,9,2.6,24,.4,.2,.4,{t:'AP-01 · punto de acceso Wi-Fi',d:[['Equipo','Cisco Aironet 2702I'],['Montaje','Bajo bandeja B-O2, pasillo distribuidor'],['Conexión','SW-ACC-01 (rack OF-01)']]});
+
+// ====== Norte y escala gráfica ======
+B(L.base,M.cap,-5,.03,3.2,.25,.02,3);G(L.base,M.cap,unitBox,-5.45,.03,2.2,.25,.02,1.4,0,-.6,0);G(L.base,M.cap,unitBox,-4.55,.03,2.2,.25,.02,1.4,0,.6,0);
+label(L.labels,'N',-5,1.4,.6,{size:1.2,bg:null});
+[0,5,10,15].forEach(function(s,i){B(L.base,i%2?wm:M.cap,2.5+s,.0,49.2,5,.04,.4);});
+[0,5,10,20].forEach(function(s){label(L.labels,s+(s===20?' m':''),s,.7,50.3,{size:.6,bg:null});});
+flush();
+buildRacks();
+}
+
+// ====== Racks de comunicaciones con equipos ======
+var UH=.04445,RW=.4826;
+function devTex(U,draw){var cv=document.createElement('canvas');cv.width=1024;cv.height=96*U;var c=cv.getContext('2d');draw(c,1024,96*U);var t=new T.CanvasTexture(cv);t.encoding=T.sRGBEncoding;t.anisotropy=ANISO;return t;}
+function ppX(i){return 104+Math.floor(i/6)*210+(i%6)*33+14;}
+function swX(col){return 152+col*25+Math.floor(col/6)*10+10;}
+function px2x(px){return(px/1024-.5)*RW;}
+var D={
+ base:function(c,H,col){c.fillStyle=col;c.fillRect(0,0,1024,H);var g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(255,255,255,.10)');g.addColorStop(.12,'rgba(255,255,255,0)');g.addColorStop(1,'rgba(0,0,0,.25)');c.fillStyle=g;c.fillRect(0,0,1024,H);
+   for(var y=0;y<H;y+=96)[[22,y+22],[22,y+74],[1002,y+22],[1002,y+74]].forEach(function(p){c.fillStyle='#050505';c.beginPath();c.ellipse(p[0],p[1],11,7,0,0,7);c.fill();c.fillStyle='#c5cacf';c.beginPath();c.arc(p[0],p[1],5.5,0,7);c.fill();c.strokeStyle='#444';c.lineWidth=1.5;c.beginPath();c.moveTo(p[0]-3,p[1]-3);c.lineTo(p[0]+3,p[1]+3);c.moveTo(p[0]+3,p[1]-3);c.lineTo(p[0]-3,p[1]+3);c.stroke();});},
+ txt:function(c,s,x,y,sz,col,al){c.font='600 '+sz+'px "Barlow","Segoe UI",Arial,sans-serif';c.fillStyle=col||'#e8ebee';c.textAlign=al||'left';c.textBaseline='middle';c.fillText(s,x,y);},
+ rj:function(c,x,y,w,h,plug,up){c.fillStyle='#b9bec3';c.fillRect(x-1,y-1,w+2,h+2);c.fillStyle='#050505';c.fillRect(x,y,w,h);c.fillStyle='#b8962c';for(var i=0;i<6;i++)c.fillRect(x+3+i*(w-7)/5,up?y+1:y+h-6,1.3,5);
+   if(plug){c.fillStyle=plug;c.fillRect(x+2,y+2,w-4,h-4);c.fillStyle='rgba(255,255,255,.4)';c.fillRect(x+4,y+3,w-8,3);c.fillStyle='rgba(0,0,0,.35)';c.fillRect(x+w/2-4,up?y+2:y+h-7,8,5);}},
+ led:function(c,x,y,col,r){c.fillStyle=col;c.beginPath();c.arc(x,y,r||3,0,7);c.fill();c.fillStyle='rgba(255,255,255,.5)';c.beginPath();c.arc(x-1,y-1,(r||3)/3,0,7);c.fill();},
+ pp:function(used,col,name){return function(c,W,H){D.base(c,H,'#17191c');for(var g=0;g<4;g++){c.fillStyle='#f1f1ec';c.fillRect(100+g*210,10,200,17);c.fillStyle='#333';c.font='600 11px Arial';c.textAlign='center';c.textBaseline='middle';for(var k=0;k<6;k++)c.fillText(String(g*6+k+1),ppX(g*6+k),19);}
+   for(var i=0;i<24;i++)D.rj(c,ppX(i)-14,36,28,30,i<used?col:null,true);D.txt(c,name,512,82,12,'#9aa3ab','center');D.txt(c,'Cat6A',60,50,12,'#9aa3ab');};},
+ odf:function(used,name){return function(c,W,H){D.base(c,H,'#22262a');c.fillStyle='#2d3237';c.fillRect(70,8,884,80);for(var g=0;g<3;g++)for(var k=0;k<4;k++){var x=110+g*280+k*62,i=g*4+k;c.fillStyle='#0c0e10';c.fillRect(x-3,24,54,40);c.fillStyle='#19c2c9';c.fillRect(x,27,23,34);c.fillRect(x+25,27,23,34);
+     if(i<used){c.fillStyle='#e9f6f7';c.fillRect(x+4,31,15,26);c.fillRect(x+29,31,15,26);c.fillStyle='#14a3a9';c.fillRect(x+7,36,9,16);c.fillRect(x+32,36,9,16);}else{c.fillStyle='#0a6e73';c.fillRect(x+4,33,15,22);c.fillRect(x+29,33,15,22);}
+     c.fillStyle='#cfd5da';c.font='10px Arial';c.textAlign='center';c.fillText(String(i*2+1)+'-'+String(i*2+2),x+24,75);}D.txt(c,name,512,14,11,'#dfe4e8','center');};},
+ org:function(c,W,H){D.base(c,H,'#131517');for(var k=0;k<5;k++){var x=130+k*175;c.strokeStyle='#3a4046';c.lineWidth=9;c.beginPath();c.moveTo(x,18);c.lineTo(x+70,18);c.lineTo(x+70,78);c.lineTo(x,78);c.stroke();c.strokeStyle='rgba(255,255,255,.12)';c.lineWidth=2;c.beginPath();c.moveTo(x,14);c.lineTo(x+73,14);c.stroke();}},
+ sw:function(name,up,sfp,body){return function(c,W,H){D.base(c,H,body||'#2c3338');c.fillStyle='rgba(0,0,0,.25)';c.fillRect(48,6,928,84);
+   D.txt(c,'SYST',62,22,9,'#b9c1c8');D.led(c,100,22,'#3ddc64');D.txt(c,'RPS',62,38,9,'#b9c1c8');D.led(c,100,38,'#2b3035');D.txt(c,'STAT',62,54,9,'#b9c1c8');D.led(c,100,54,'#3ddc64');D.txt(c,'MODE',62,74,9,'#b9c1c8');c.fillStyle='#0d0f10';c.fillRect(92,68,18,12);
+   for(var col=0;col<24;col++)for(var r=0;r<2;r++){var x=swX(col)-10,y=r?52:20,on=(col*2+r)<up;D.rj(c,x,y,20,24,null,!r);c.fillStyle=on?(rnd()<.85?'#3ddc64':'#f2b01e'):'#30363b';c.fillRect(x+2,r?80:11,6,4);c.fillStyle=on?'#3ddc64':'#30363b';c.fillRect(x+12,r?80:11,6,4);}
+   for(var s=0;s<4;s++){var x=838+s*36;c.fillStyle='#aeb5bb';c.fillRect(x,r=30,30,36);c.fillStyle='#0a0b0c';c.fillRect(x+3,33,24,30);if(s<sfp){c.fillStyle='#d9dde0';c.fillRect(x+4,34,22,28);c.fillStyle='#19c2c9';c.fillRect(x+6,40,8,16);c.fillRect(x+16,40,8,16);}}
+   D.txt(c,name,836,16,13,'#e6eaed');c.fillStyle='#0aa3a0';c.fillRect(48,88,928,3);};},
+ isr:function(c,W,H){D.base(c,H,'#343a40');c.fillStyle='#22272b';c.fillRect(48,10,928,172);D.txt(c,'Cisco 2900 Series',70,30,17,'#e6eaed');D.txt(c,'ISR 2911',70,52,12,'#9aa3ab');
+   ['SYS','ACT','POE','RPS'].forEach(function(s,i){D.txt(c,s,70+i*46,84,9,'#b9c1c8');D.led(c,78+i*46,100,i<2?'#3ddc64':'#2b3035',4);});
+   c.fillStyle='#7fc6e8';c.fillRect(70,126,30,26);c.fillStyle='#050505';c.fillRect(74,130,22,18);D.txt(c,'CON',72,164,9,'#b9c1c8');c.fillStyle='#111';c.fillRect(112,128,26,22);D.txt(c,'AUX',114,164,9,'#b9c1c8');c.fillStyle='#0d0f10';c.fillRect(150,132,22,10);c.fillRect(150,146,22,10);D.txt(c,'USB',150,168,9,'#b9c1c8');
+   for(var i=0;i<3;i++){D.rj(c,200+i*44,124,32,30,i<2?'#f2c200':null);D.txt(c,'GE 0/'+i,200+i*44,168,9,'#f2c200');}
+   for(var s=0;s<4;s++){var x=360+s*150;c.fillStyle='#3b4147';c.fillRect(x,24,140,66);c.strokeStyle='#555d64';c.lineWidth=2;c.strokeRect(x,24,140,66);D.txt(c,'EHWIC '+s,x+10,36,9,'#9aa3ab');D.led(c,x+8,82,'#c5cacf',4);D.led(c,x+132,82,'#c5cacf',4);
+     if(s===0){for(var k=0;k<4;k++)D.rj(c,x+12+k*30,48,24,24,k<1?'#3d7fd6':null);}}
+   c.fillStyle='#3b4147';c.fillRect(360,104,590,68);c.strokeStyle='#555d64';c.strokeRect(360,104,590,68);D.txt(c,'SM 1 · módulo de servicio (libre)',376,138,11,'#9aa3ab');},
+ srv:function(name){return function(c,W,H){D.base(c,H,'#1b1d20');c.fillStyle='#2a2d31';c.fillRect(46,0,60,H);D.led(c,76,40,'#3ddc64',9);c.strokeStyle='#cfd5da';c.lineWidth=2;c.beginPath();c.arc(76,40,13,0,7);c.stroke();c.fillStyle='#0e2a44';c.fillRect(56,84,40,56);c.fillStyle='#6fb6ff';c.fillRect(60,90,32,8);c.fillRect(60,104,22,6);
+   for(var i=0;i<4;i++)for(var j=0;j<2;j++){var x=118+i*206,y=10+j*88;c.fillStyle='#0b0c0d';c.fillRect(x,y,198,82);c.fillStyle='#2f3337';c.fillRect(x+4,y+4,190,74);c.fillStyle='#101214';for(var a=0;a<14;a++)for(var b=0;b<5;b++){c.beginPath();c.arc(x+18+a*12+(b%2)*6,y+14+b*12,3.6,0,7);c.fill();}
+     c.fillStyle='#4a4f55';c.fillRect(x+4,y+66,190,12);D.led(c,x+178,y+72,'#3ddc64',3);D.led(c,x+166,y+72,rnd()<.5?'#3ddc64':'#1c1f22',3);}
+   c.fillStyle='#2a2d31';c.fillRect(944,0,36,H);c.fillStyle='#0d0f10';c.fillRect(950,30,24,12);c.fillRect(950,50,24,12);c.fillStyle='#1a56b0';c.fillRect(950,110,24,34);
+   D.txt(c,name,512,H-9,0,'#fff');c.save();c.translate(108,H/2);c.rotate(-PI/2);D.txt(c,name,0,0,11,'#cfd5da','center');c.restore();};},
+ ups:function(name,lcd){return function(c,W,H){D.base(c,H,'#0f1113');for(var x=70;x<380;x+=10){c.fillStyle='#000';c.fillRect(x,24,5,H-48);}for(var x=650;x<950;x+=10){c.fillStyle='#000';c.fillRect(x,24,5,H-48);}
+   c.fillStyle='#1c2024';c.fillRect(400,20,230,H-40);if(lcd){c.fillStyle='#0b3d6b';c.fillRect(416,36,130,88);c.fillStyle='#7fd0ff';c.font='600 18px Arial';c.textAlign='left';c.fillText('230 V   50 Hz',424,60);c.fillText('CARGA 38 %',424,84);c.fillText('BAT 100 %',424,108);
+     [0,1,2].forEach(function(k){c.fillStyle='#3a4046';c.beginPath();c.arc(590,52+k*36,11,0,7);c.fill();});D.led(c,430,144,'#3ddc64',5);}
+   D.txt(c,name,515,H-34,13,'#cfd5da','center');};},
+ pdu:function(c,W,H){D.base(c,H,'#15171a');c.fillStyle='#b3261e';c.fillRect(70,30,44,36);c.fillStyle='#ff6b5e';c.fillRect(74,34,36,14);for(var i=0;i<8;i++){var x=190+i*98;c.fillStyle='#050505';c.beginPath();c.arc(x,48,30,0,7);c.fill();c.fillStyle='#1d2024';c.beginPath();c.arc(x,48,24,0,7);c.fill();c.fillStyle='#000';c.beginPath();c.arc(x-9,48,4,0,7);c.arc(x+9,48,4,0,7);c.fill();}D.txt(c,'PDU 8 × Schuko 16 A',940,84,10,'#9aa3ab','right');},
+ blank:function(c,W,H){D.base(c,H,'#16181b');},
+ shelf:function(c,W,H){D.base(c,H,'#16181b');for(var x=80;x<950;x+=28){c.fillStyle='#050505';c.fillRect(x,H-40,16,8);}},
+ fg:function(c,W,H){c.fillStyle='#eef0f1';c.fillRect(0,0,W,H);var g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(255,255,255,.5)');g.addColorStop(1,'rgba(0,0,0,.18)');c.fillStyle=g;c.fillRect(0,0,W,H);
+   D.txt(c,'FortiGate 60E',60,H/2,H*.34,'#c8102e');['PWR','STA','HA','WAN1','WAN2','DMZ','1','2','3','4','5','6','7'].forEach(function(s,i){var x=440+i*42;D.txt(c,s,x,H*.3,H*.12,'#59626a','center');D.led(c,x,H*.62,i<4||i>5&&i<10?'#3ddc64':'#c9ced2',H*.07);});},
+ cpe:function(c,W,H){c.fillStyle='#17191c';c.fillRect(0,0,W,H);D.txt(c,'CPE OPERADOR · FTTH',50,H*.3,H*.2,'#e6eaed');['PWR','PON','LOS','LAN1','LAN2','LAN3','LAN4','TEL','WLAN'].forEach(function(s,i){var x=70+i*100;D.txt(c,s,x,H*.62,H*.1,'#9aa3ab','center');D.led(c,x,H*.8,i===2?'#2b3035':'#3ddc64',H*.045);});}
+};
+function buildRacks(){
+ var bodyM={dark:mat(0x1b1e21,{r:.5,m:.6}),sw:mat(0x2c3338,{r:.5,m:.6}),srv:mat(0x25282c,{r:.45,m:.7}),zinc:mat(0x9aa2a9,{r:.4,m:.8}),white:mat(0xeef0f1,{r:.4}),cpe:mat(0x17191c,{r:.4})};
+ var cordM={blue:mat(0x1f6fd1,{r:.5}),grey:mat(0x9aa2a9,{r:.5}),yellow:mat(0xf2c200,{r:.5}),aqua:mat(0x19c2c9,{r:.4}),green:mat(0x2e9e4f,{r:.5}),red:mat(0xd63a2a,{r:.5}),white:mat(0xf1f1f1,{r:.5})};
+ function rack(R){var g=new T.Group();g.position.set(R.x,0,R.z);g.rotation.y=R.ry;root.add(g);
+  var W=R.W,Dp=1.0,H=2.0,y0=.085,zf=Dp/2-.075,Y=function(U,h){return y0+(U-1)*UH+(h||1)*UH/2;};
+  stack=[new T.Matrix4()];
+  [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(function(s){B(g,M.rackFrame,s[0]*(W/2-.02),H/2,s[1]*(Dp/2-.02),.04,H,.04);C(g,M.dark,s[0]*(W/2-.06),.012,s[1]*(Dp/2-.06),.03,.024);});
+  B(g,M.rackFrame,0,H-.012,0,W,.024,Dp);B(g,M.rackFrame,0,.045,0,W,.05,Dp);for(var k=-3;k<=3;k++)B(g,M.dark,k*.07,H+.001,-.15,.04,.004,.5);
+  [-1,1].forEach(function(s){B(g,M.rackSide,s*(W/2-.004),H/2,0,.006,H-.08,Dp-.08);B(g,M.rail,s*(RW/2-.0085),y0+21*UH,zf-.004,.017,42*UH,.003);B(g,M.rackFrame,s*(RW/2+.012),y0+21*UH,zf-.02,.03,42*UH,.03);
+    B(g,M.rail,s*(RW/2-.0085),y0+21*UH,-zf,.017,42*UH,.003);});
+  B(g,M.rackSide,0,H/2,-Dp/2+.005,W-.08,H-.08,.008);
+  if(W>.7)[-1,1].forEach(function(s){B(g,M.rackFrame,s*.33,y0+21*UH,zf+.0,.07,42*UH,.02);for(var u=1;u<=42;u+=1)B(g,M.plastic,s*.33,Y(u),zf+.04,.075,.008,.07);B(g,M.plastic,s*.365,y0+21*UH,zf+.075,.006,42*UH,.004);});
+  // puerta frontal de vidrio abierta
+  push(-W/2,0,Dp/2,-1.85);B(g,M.rackGlass,W/2,H/2,.006,W-.1,H-.16,.005);[[W/2,H-.05,W,.07],[W/2,.09,W,.07]].forEach(function(p){B(g,M.rackFrame,p[0],p[1],.006,p[2],p[3],.02);});B(g,M.rackFrame,.025,H/2,.006,.05,H-.06,.02);B(g,M.rackFrame,W-.025,H/2,.006,.05,H-.06,.02);B(g,M.alu,W-.04,1.05,.03,.02,.16,.02);pop();
+  // marcas de U
+  var rows=[],devGroup=new T.Group();g.add(devGroup);
+  var call=new T.Group();call.visible=false;g.add(call);
+  R.dev.forEach(function(d){var U=d[0],h=d[1],type=d[2],name=d[3],model=d[4],o=d[5]||{},tx,depth=.12,body=bodyM.dark,w=RW,y=Y(U,h),hh=h*UH-.0015;
+   if(type==='pp'){tx=devTex(1,D.pp(o.used||0,o.col||'#1f6fd1',name+' · '+model));depth=.11;}
+   else if(type==='odf'){tx=devTex(1,D.odf(o.used||0,name+' · '+model));depth=.28;}
+   else if(type==='org'){tx=devTex(1,D.org);depth=.03;}
+   else if(type==='sw'){tx=devTex(1,D.sw(model,o.up,o.sfp));depth=.42;body=bodyM.sw;}
+   else if(type==='isr'){tx=devTex(2,D.isr);depth=.47;body=bodyM.sw;}
+   else if(type==='srv'){tx=devTex(2,D.srv(model));depth=.74;body=bodyM.srv;}
+   else if(type==='ups'){tx=devTex(2,D.ups(model,o.lcd));depth=.66;}
+   else if(type==='pdu'){tx=devTex(1,D.pdu);depth=.09;}
+   else if(type==='blank'){tx=devTex(h,D.blank);depth=.012;}
+   else if(type==='shelf'){tx=devTex(1,D.shelf);depth=.4;}
+   var f=new T.MeshStandardMaterial({map:tx,roughness:.55,metalness:.25});
+   var mesh;
+   if(type==='shelf'){mesh=new T.Mesh(new T.BoxGeometry(RW,.004,depth),bodyM.dark);mesh.position.set(0,Y(U,1)-UH/2+.004,zf-depth/2);devGroup.add(mesh);
+     var lip=new T.Mesh(new T.BoxGeometry(RW,.02,.004),[bodyM.dark,bodyM.dark,bodyM.dark,bodyM.dark,f,bodyM.dark]);lip.position.set(0,Y(U,1)-UH/2+.012,zf);devGroup.add(lip);
+     (o.items||[]).forEach(function(it){var t2=tex(512,Math.round(512*it.h/it.w),D[it.draw]);t2.wrapS=t2.wrapT=T.ClampToEdgeWrapping;var bm=bodyM[it.body],fm=new T.MeshStandardMaterial({map:t2,roughness:.5});
+       var b=new T.Mesh(new T.BoxGeometry(it.w,it.h,it.d),[bm,bm,bm,bm,fm,bm]);b.position.set(it.x,Y(U,1)-UH/2+.008+it.h/2,zf-.012-it.d/2);b.castShadow=true;b.userData.info={t:it.name,d:[['Equipo',it.model],['Posición','U'+U+(h>1?'–U'+(U+h-1):'')+' · sobre bandeja 19"'],['Estado','Propuesta sobre U reservadas']]};devGroup.add(b);pick.push(b);});
+     mesh=null;}
+   else{mesh=new T.Mesh(new T.BoxGeometry(type==='org'||type==='pp'||type==='blank'||type==='pdu'?RW:RW,hh,depth),[body,body,body,body,f,body]);mesh.position.set(0,y,zf-depth/2+(type==='org'?.03:0));mesh.castShadow=true;devGroup.add(mesh);
+     if(type==='org'){for(var k=0;k<5;k++){var rx=px2x(165+k*175);var ring=new T.Mesh(new T.TorusGeometry(.016,.003,6,14),bodyM.zinc);ring.position.set(rx,y,zf+.045);ring.rotation.y=PI/2;devGroup.add(ring);}}
+     if(type!=='org'&&type!=='blank'){mesh.userData.info={t:name,d:[['Equipo',model],['Posición','U'+U+(h>1?'–U'+(U+h-1):'')],['Estado',o.plan?'Previsto en el alzado del plano':'Propuesta sobre U reservadas']]};pick.push(mesh);}}
+   if(type!=='org'&&type!=='blank'){rows.push([U,h,name,model]);
+     var cx=W/2+.06;line(call,[new V3(RW/2+.02,y,zf+.01),new V3(cx+.1,y,zf+.01)],0x5d6b78);
+     label(call,(h>1?'U'+U+'–'+(U+h-1):'U'+U)+'  ·  '+name+'  ·  '+model,cx+.12,y,zf+.01,{size:.036,left:1,border:o.plan?'#6b7f8e':'#e8590c'});}
+  });
+  // latiguillos
+  function cord(a,b,m,r,k){var xa=px2x(a[1]),xb=px2x(b[1]),ya=Y(a[0]),yb=Y(b[0]),s=(xa+xb<0?-1:1),sx=s*(W>.7?.325:.262)+s*(k%4)*.006,z1=zf+.012,z2=zf+.05+(k%3)*.006;
+    var da=a[2]||-1,db=b[2]||-1;
+    var pts=[new V3(xa,ya,z1),new V3(xa,ya+da*UH*.55,z2),new V3(xa+s*.03,ya+da*UH,z2+.006),new V3(sx,ya+da*UH*1.05,z2),new V3(sx+s*.004,(ya+yb)/2,z2+.008),new V3(sx,yb+db*UH*1.05,z2),new V3(xb+s*.03,yb+db*UH,z2+.006),new V3(xb,yb+db*UH*.55,z2),new V3(xb,yb,z1)];
+    var mesh=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts,false,'catmullrom',.25),56,r||.0028,6),m);mesh.castShadow=true;devGroup.add(mesh);
+    [pts[0],pts[8]].forEach(function(p){var pl=new T.Mesh(new T.BoxGeometry(.011,.009,.03),m);pl.position.set(p.x,p.y,p.z+.008);devGroup.add(pl);});}
+  R.cords(cord,cordM);
+  flush();
+  // escenario para la vista aislada
+  var st=new T.Group();st.visible=false;g.add(st);var fl=new T.Mesh(new T.CircleGeometry(2.6,48),tinted(TX.raised,0xffffff,.45));fl.rotation.x=-PI/2;fl.position.y=.002;fl.receiveShadow=true;
+  var uv=fl.geometry.attributes.uv;for(var i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)*5.2,uv.getY(i)*5.2);st.add(fl);
+  var pr=proxy(g,0,H/2,0,W,H,Dp,R.info);
+  label(L.labels,'RACK '+R.name,R.x,2.75,R.z,{size:.7,color:'#fff',bg:'#b3261e'});
+  rows.sort(function(a,b){return b[0]-a[0];});
+  RK[R.key]={g:g,call:call,stage:st,proxy:pr,rows:rows,R:R};}
+
+ rack({key:'of',name:'OF-01',x:16.5,z:9.5,ry:-PI/2,W:.6,title:'RACK OF-01 · distribuidor de planta · 42U 600×1000',
+  info:{t:'Rack OF-01 · distribuidor de planta',d:[['Ubicación','Departamento de TI'],['Armario','42U · 600 × 1000'],['Paneles Cat6A','4 × PP 24p = 96 RJ45 · 64 en uso'],['Troncal','ODF 24 LC OM4 12F + PP cobre (2)'],['Ocupación','12 U pasivos · 11 U reserva · 19 U libres'],['Detalle','Usa la vista «Detalle del rack OF-01»']]},
+  dev:[[42,1,'odf','ODF-T','ODF 24 LC · troncal OM4 12F',{used:6,plan:1}],[41,1,'pp','PP-T','Cat6A · troncal cobre (2)',{used:2,col:'#f2c200',plan:1}],[40,1,'org'],
+   [39,1,'pp','PP-01','O-01…O-12 · 24 RJ45',{used:24,plan:1}],[38,1,'org'],[37,1,'pp','PP-02','O-13…O-24 · 24 RJ45',{used:24,plan:1}],[36,1,'org'],
+   [35,1,'pp','PP-03','O-25…O-32 + reserva',{used:16,plan:1}],[34,1,'org'],[33,1,'pp','PP-04','reserva AP / cámaras',{used:1,col:'#2e9e4f',plan:1}],[32,1,'org'],
+   [30,1,'sw','SW-ACC-01','Catalyst 2960-S Series · 48p',{up:44,sfp:2}],[29,1,'org'],[28,1,'sw','SW-ACC-01B','Catalyst 2960-S Series · 48p (apilado)',{up:22,sfp:0}],[27,1,'org'],
+   [24,3,'blank'],[21,3,'blank'],
+   [4,2,'ups','SAI-OF','SAI on-line 1,5 kVA · 2U',{lcd:1}],[1,1,'pdu','PDU-OF','Regleta 19" 8 × Schuko 16 A',{plan:1}]],
+  cords:function(cord,cm){var k=0,i;for(i=0;i<24;i+=2){cord([39,ppX(i)],[30,swX(Math.floor(i/2)),1],cm.blue,0,k++);cord([37,ppX(i+1)],[30,swX(12+Math.floor(i/2)),1],cm.blue,0,k++);}
+   for(i=0;i<16;i+=2)cord([35,ppX(i)],[28,swX(i/2+ (i>7?4:0)),1],cm.grey,0,k++);cord([33,ppX(0)],[28,swX(20),1],cm.green,0,k++);
+   cord([42,134+0],[30,853,1],cm.aqua,.0018,k++);cord([42,196],[30,889,1],cm.aqua,.0018,k++);cord([41,ppX(0)],[28,swX(23),1],cm.yellow,0,k++);}});
+
+ rack({key:'al',name:'AL-01',x:39,z:37,ry:PI/2,W:.8,title:'RACK AL-01 · distribuidor de edificio · 42U 800×1000',
+  info:{t:'Rack AL-01 · distribuidor de edificio',d:[['Ubicación','Sala técnica'],['Armario','42U · 800 × 1000'],['Paneles Cat6A','4 × PP 24p = 96 RJ45 · 44 en uso'],['Troncal y acometida','ODF troncal OM4 12F + ODF operadores'],['Ocupación','13 U pasivos · 15 U reserva · 14 U libres'],['Detalle','Usa la vista «Detalle del rack AL-01»']]},
+  dev:[[41,1,'shelf','RTR-ISP','CPE del operador',{items:[{name:'RTR-ISP · router del proveedor',model:'CPE del operador (equipo cedido) · acceso WAN',draw:'cpe',body:'cpe',w:.26,h:.045,d:.2,x:-.08}]}],
+   [40,1,'odf','ODF-OP','ODF · acometida operadores',{used:2,plan:1}],[39,1,'odf','ODF-T','ODF 24 LC · troncal OM4 12F',{used:6,plan:1}],[38,1,'pp','PP-T','Cat6A · troncal cobre (2)',{used:2,col:'#f2c200',plan:1}],[37,1,'org'],
+   [36,1,'pp','PP-01','A-01…A-12 · 24 RJ45',{used:24,col:'#19a3a8',plan:1}],[35,1,'org'],[34,1,'pp','PP-02','A-13…A-22 + reserva',{used:20,col:'#19a3a8',plan:1}],[33,1,'org'],
+   [32,1,'pp','PP-03','reserva AP / cámaras',{used:0,plan:1}],[31,1,'org'],[30,1,'pp','PP-04','reserva AP / cámaras',{used:0,plan:1}],[29,1,'org'],
+   [27,1,'shelf','FW-01','Fortinet FortiGate 60E',{items:[{name:'FW-01 · firewall perimetral',model:'Fortinet FortiGate 60E',draw:'fg',body:'white',w:.216,h:.038,d:.16,x:0}]}],
+   [25,2,'isr','RTR-01','Cisco ISR 2911 · router corporativo'],[24,1,'org'],
+   [23,1,'sw','SW-DIST-01','Catalyst 3750-X Series · 48p',{up:30,sfp:4}],[22,1,'org'],[21,1,'sw','SW-ACC-02','Catalyst 2960-S Series · 48p',{up:44,sfp:2}],[20,1,'org'],
+   [16,2,'srv','SRV-AD-01','PowerEdge R720 · Active Directory'],[13,2,'srv','SRV-APP-01','PowerEdge R730 · aplicaciones'],
+   [10,2,'blank'],[5,2,'ups','SAI-AL','SAI on-line 3 kVA · 2U',{lcd:1}],[3,2,'ups','BAT-AL','Módulo de baterías · 2U'],[1,1,'pdu','PDU-AL','Regleta 19" 8 × Schuko 16 A',{plan:1}]],
+  cords:function(cord,cm){var k=0,i;for(i=0;i<24;i+=2){cord([36,ppX(i)],[21,swX(i/2),1],cm.blue,0,k++);cord([34,ppX(i<20?i:19)],[21,swX(12+i/2),1],cm.blue,0,k++);}
+   cord([39,134],[23,853,1],cm.aqua,.0018,k++);cord([39,196],[23,889,1],cm.aqua,.0018,k++);cord([21,853,-1],[23,925,1],cm.aqua,.0018,k++);
+   cord([38,ppX(0)],[23,swX(23),1],cm.yellow,0,k++);cord([25,216,-1],[23,swX(0),1],cm.yellow,0,k++);cord([25,260,-1],[23,swX(1),1],cm.yellow,0,k++);
+   for(i=2;i<8;i++)cord([23,swX(i),-1],[21,swX(i+13),1],cm.grey,0,k++);
+   cord([40,134],[41,300,1],cm.aqua,.0018,k++);}});
+}
+
+// ====== Cámara, vistas y recorrido ======
+var VIEWS={general:[[8,40,70],[31,0,21]],planta:[[30,96,20.05],[30,0,20]],oficinas:[[-7,15,31],[7,1,15]],almacen:[[31,15,-13],[31,2.5,14]],picking:[[19,7,45],[27,1,33.5]],
+  muelles:[[82,13,40],[56,1,22]],'sala-ti':[[10.6,3.4,7.4],[15.4,1.2,9.9]],'sala-tecnica':[[45.6,5.0,34.6],[39.4,1.0,37.1]]};
+var CLOSE={'sala-ti':1,'sala-tecnica':1,picking:1};
+var tween=null,iso=null,reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var card=document.getElementById('card'),CARD0=card.innerHTML;
+function esc(s){return String(s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+function layerOn(k){var cb=document.getElementById('l-'+k);return cb?cb.checked:true;}
+function setIso(k){iso=k;Object.keys(L).forEach(function(n){L[n].visible=k?false:layerOn(n);});
+  Object.keys(RK).forEach(function(n){var r=RK[n];r.g.visible=!k||k===n;r.call.visible=r.stage.visible=(k===n);r.proxy.visible=!k;});
+  document.body.classList.toggle('iso',!!k);scene.fog.near=k?500:150;scene.fog.far=k?900:340;
+  if(k){var r=RK[k];card.innerHTML='<h3>'+esc(r.R.title)+'</h3><p>Etiquetas con borde naranja: electrónica propuesta sobre U reservadas. Borde gris: pasivos del alzado del plano. Haz clic en un equipo para ver su ficha.</p>';}
+  else card.innerHTML=CARD0;}
+function usable(){var off=window.innerWidth>760?316:0;return(stage.clientWidth-off)/stage.clientHeight;}
+function goto(name,instant){var p,t,ua=usable();
+  if(name==='rack-of01'||name==='rack-al01'){var k=name==='rack-of01'?'of':'al';setIso(k);var g=RK[k].g;scene.updateMatrixWorld(true);
+    t=g.localToWorld(new V3(.5,1.04,.2));p=g.localToWorld(new V3(1.15,1.2,3.75));p.sub(t).multiplyScalar(Math.min(2.4,Math.max(1,1.15/ua))).add(t);}
+  else{var v=VIEWS[name];if(!v)return;if(iso)setIso(null);p=new V3(v[0][0]-30,v[0][1],v[0][2]-20);t=new V3(v[1][0]-30,v[1][1],v[1][2]-20);
+    p.sub(t).multiplyScalar(Math.min(2.6,Math.max(1,(CLOSE[name]?1.2:1.85)/ua))).add(t);}
+  document.querySelectorAll('#views button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.v===name?'true':'false');});
+  try{history.replaceState(null,'','#'+name);}catch(e){}
+  if(instant||reduce){camera.position.copy(p);controls.target.copy(t);tween=null;return;}
+  tween={p0:camera.position.clone(),t0:controls.target.clone(),p1:p,t1:t,s:performance.now(),d:1500};}
+['trunk','trays','hof','hal','to','racks','furn','struct','labels','shell'].forEach(function(k){document.getElementById('l-'+k).addEventListener('change',function(e){if(!iso)L[k].visible=e.target.checked;});});
+document.getElementById('views').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;stopTour();goto(b.dataset.v);});
+var tourBtn=document.getElementById('tour'),tourTimer=null,tourSeq=['general','oficinas','sala-ti','rack-of01','almacen','picking','muelles','sala-tecnica','rack-al01'],tourI=0;
+function stopTour(){if(tourTimer){clearInterval(tourTimer);tourTimer=null;}tourBtn.setAttribute('aria-pressed','false');tourBtn.textContent='Iniciar recorrido automático';}
+tourBtn.addEventListener('click',function(){if(tourTimer){stopTour();return;}tourBtn.setAttribute('aria-pressed','true');tourBtn.textContent='Detener recorrido';tourI=0;goto(tourSeq[0]);
+  tourTimer=setInterval(function(){tourI=(tourI+1)%tourSeq.length;goto(tourSeq[tourI]);},7000);});
+var panel=document.getElementById('panel');if(window.innerWidth<=760)panel.classList.add('closed');
+document.getElementById('toggle').addEventListener('click',function(){panel.classList.toggle('closed');});
+
+// ====== Selección ======
+var ray=new T.Raycaster(),down=null;
+function visible(o){while(o){if(!o.visible)return false;o=o.parent;}return true;}
+renderer.domElement.addEventListener('pointerdown',function(e){down=[e.clientX,e.clientY];stopTour();});
+renderer.domElement.addEventListener('pointerup',function(e){if(!down)return;var moved=Math.abs(e.clientX-down[0])+Math.abs(e.clientY-down[1]);down=null;if(moved>6)return;
+  var r=renderer.domElement.getBoundingClientRect();ray.setFromCamera(new T.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),camera);
+  var hits=ray.intersectObjects(pick.filter(visible),false);if(!hits.length)return;var info=hits[0].object.userData.info;
+  card.innerHTML='<h3>'+esc(info.t)+'</h3><dl>'+info.d.map(function(d){return'<dt>'+esc(d[0])+'</dt><dd>'+esc(d[1])+'</dd>';}).join('')+'</dl>';});
+
+function resize(){var w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;
+  var off=window.innerWidth>760?316:0;if(off)camera.setViewOffset(w+off,h,0,0,w,h);else camera.clearViewOffset();camera.updateProjectionMatrix();}
+window.addEventListener('resize',resize);
+function frame(now){requestAnimationFrame(frame);
+  if(tween){var k=Math.min(1,(now-tween.s)/tween.d),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;camera.position.lerpVectors(tween.p0,tween.p1,e);controls.target.lerpVectors(tween.t0,tween.t1,e);if(k>=1)tween=null;}
+  if(L.labels.visible){var ch=L.labels.children,wp=new V3();for(var i=0;i<ch.length;i++){var sp=ch[i];if(!sp.userData.bs)continue;var d=sp.getWorldPosition(wp).distanceTo(camera.position),f=Math.min(1.1,Math.max(.14,d/60));sp.scale.set(sp.userData.bs[0]*f,sp.userData.bs[1]*f,1);}}
+  controls.update();renderer.render(scene,camera);}
+function start(){build();resize();var h=(location.hash||'').slice(1);goto((VIEWS[h]||h==='rack-of01'||h==='rack-al01')?h:'general',true);requestAnimationFrame(frame);}
+window.addEventListener('hashchange',function(){var h=(location.hash||'').slice(1);if(VIEWS[h]||h==='rack-of01'||h==='rack-al01')goto(h);});
+var started=false;function once(){if(!started){started=true;try{start();}catch(e){console.error(e);errEl.firstElementChild.textContent='No se pudo construir la maqueta: '+e.message;errEl.style.display='flex';}}}
+if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load('700 44px "Barlow Condensed"'),document.fonts.load('600 12px "Barlow"')]).then(once,once);setTimeout(once,1500);}else once();
+})();
+</script>
+</body>
+</html>
