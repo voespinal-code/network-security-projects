@@ -6,7 +6,7 @@
 
 ## 1. La empresa
 
-**LogiTrans Iberia, S.L.** es una empresa *ficticia* de almacenamiento y distribución de mercancías para otras empresas (B2B). Su actividad consiste en recibir productos, almacenarlos, preparar pedidos y coordinar su expedición.
+**LogiTrans Iberia, S.L.** (nombre anonimizado de un cliente real) es una empresa de almacenamiento y distribución de mercancías para otras empresas (B2B). Su actividad consiste en recibir productos, almacenarlos, preparar pedidos y coordinar su expedición.
 
 | Dato | Valor |
 |---|---|

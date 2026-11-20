@@ -4,7 +4,7 @@
 
 ![Fase 0](https://img.shields.io/badge/Fase_0-definida-1BA0D7) ![Laboratorio](https://img.shields.io/badge/laboratorio-GNS3_·_Proxmox-0B3C5D) ![Idioma](https://img.shields.io/badge/docs-español-555) [![Modelo 3D](https://img.shields.io/badge/modelo_3D-abrir_en_el_navegador-E07B00)](https://voespinal-code.github.io/network-security-projects/logitrans-iberia/3d/)
 
-Este proyecto es un **caso completo de ingeniería de redes** sobre una empresa logística **ficticia**. Recorre todo el ciclo de un proyecto de infraestructura:
+Este proyecto es un **caso completo de ingeniería de redes** basado en un trabajo real para una empresa logística, **anonimizado** por confidencialidad. Recorre todo el ciclo de un proyecto de infraestructura:
 
 1. Entender el negocio.
 2. Auditar la red existente (AS-IS).
@@ -69,9 +69,9 @@ El plano de cableado de la Fase 6 (LGT-F02-CAB-01) llevado a un modelo navegable
 
 ## Transparencia
 
-- **LogiTrans Iberia es una empresa ficticia.** El escenario, los modelos y las cifras son de diseño; las cotas del plano son hipótesis, no mediciones.
+- **LogiTrans Iberia es el nombre anonimizado de un cliente real.** El nombre de la empresa y los datos que podrían identificarla se han sustituido o generalizado; cifras, cotas y planos se presentan como referencia técnica, no como mediciones del sitio.
 - Cada fase se publica cuando está lista, y los resultados de laboratorio solo cuando existen con su evidencia.
-- Nada de este repositorio presenta experiencia en producción.
+- Se separa siempre lo realizado en el entorno del cliente de las reproducciones y pruebas emuladas en GNS3/Proxmox: cada resultado indica su entorno, su evidencia y sus limitaciones.
 
 ---
 
