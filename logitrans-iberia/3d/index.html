@@ -86,7 +86,7 @@ body.iso #hint{display:none}body.iso #card{top:12px;bottom:auto;width:290px}
 
 <aside class="panel" id="panel" aria-label="Capas y vistas">
   <header>
-    <div class="eyebrow">Logitrans Iberia, S.L. · Fase 02</div>
+    <div class="eyebrow">Logitrans Iberia, S.L. · Fase 6 · avance</div>
     <h1>Concepto 3D de cableado estructurado</h1>
     <div class="sub">Nave 60 × 40 m · base plano LGT-F02-CAB-01 Rev. 01</div>
   </header>
@@ -133,7 +133,7 @@ body.iso #hint{display:none}body.iso #card{top:12px;bottom:auto;width:290px}
         <div><b>24,2 %</b><span>ocupación máx. bandeja</span></div>
       </div>
     </section>
-    <p class="note"><b>LogiTrans Iberia es el nombre anonimizado de un cliente real.</b> Caso de portafolio de <a href="https://github.com/voespinal-code/network-security-projects/tree/main/logitrans-iberia">Víctor Espinal en GitHub</a>. Diseño conceptual, no apto para obra. Alturas, recorridos de cable y posición exacta de tomas son hipótesis. La electrónica montada en los racks es una propuesta a partir de la demo de topología: el plano de Fase 02 solo reserva las U.</p>
+    <p class="note"><b>LogiTrans Iberia es el nombre anonimizado de un cliente real.</b> Caso de portafolio de <a href="https://github.com/voespinal-code/network-security-projects/tree/main/logitrans-iberia">Víctor Espinal en GitHub</a>. Diseño conceptual, no apto para obra. Alturas, recorridos de cable y posición exacta de tomas son hipótesis. La electrónica montada en los racks es una propuesta a partir de la demo de topología: el plano LGT-F02-CAB-01 (Fase 6) solo reserva las U. <b>Estado: PROPUESTA.</b> Posición U y electrónica de los racks: supuesto S3D-03. Los latiguillos de los equipos siguen la matriz de enlaces aprobada E01–E14 (enlaces únicos, sin redundancia); los latiguillos de los paneles horizontales ilustran el cableado conceptual (S3D-10).</p>
   </div>
 </aside>
 
@@ -573,9 +573,10 @@ var D={
      if(i<used){c.fillStyle='#e9f6f7';c.fillRect(x+4,31,15,26);c.fillRect(x+29,31,15,26);c.fillStyle='#14a3a9';c.fillRect(x+7,36,9,16);c.fillRect(x+32,36,9,16);}else{c.fillStyle='#0a6e73';c.fillRect(x+4,33,15,22);c.fillRect(x+29,33,15,22);}
      c.fillStyle='#cfd5da';c.font='10px Arial';c.textAlign='center';c.fillText(String(i*2+1)+'-'+String(i*2+2),x+24,75);}D.txt(c,name,512,14,11,'#dfe4e8','center');};},
  org:function(c,W,H){D.base(c,H,'#131517');for(var k=0;k<5;k++){var x=130+k*175;c.strokeStyle='#3a4046';c.lineWidth=9;c.beginPath();c.moveTo(x,18);c.lineTo(x+70,18);c.lineTo(x+70,78);c.lineTo(x,78);c.stroke();c.strokeStyle='rgba(255,255,255,.12)';c.lineWidth=2;c.beginPath();c.moveTo(x,14);c.lineTo(x+73,14);c.stroke();}},
- sw:function(name,up,sfp,body){return function(c,W,H){D.base(c,H,body||'#2c3338');c.fillStyle='rgba(0,0,0,.25)';c.fillRect(48,6,928,84);
+ // n = número de puertos de cobre (48 por defecto; 24 en SW-DIST-01 y SW-ACC-02, D-027)
+ sw:function(name,up,sfp,body,n){var nc=(n||48)/2;return function(c,W,H){D.base(c,H,body||'#2c3338');c.fillStyle='rgba(0,0,0,.25)';c.fillRect(48,6,928,84);
    D.txt(c,'SYST',62,22,9,'#b9c1c8');D.led(c,100,22,'#3ddc64');D.txt(c,'RPS',62,38,9,'#b9c1c8');D.led(c,100,38,'#2b3035');D.txt(c,'STAT',62,54,9,'#b9c1c8');D.led(c,100,54,'#3ddc64');D.txt(c,'MODE',62,74,9,'#b9c1c8');c.fillStyle='#0d0f10';c.fillRect(92,68,18,12);
-   for(var col=0;col<24;col++)for(var r=0;r<2;r++){var x=swX(col)-10,y=r?52:20,on=(col*2+r)<up;D.rj(c,x,y,20,24,null,!r);c.fillStyle=on?(rnd()<.85?'#3ddc64':'#f2b01e'):'#30363b';c.fillRect(x+2,r?80:11,6,4);c.fillStyle=on?'#3ddc64':'#30363b';c.fillRect(x+12,r?80:11,6,4);}
+   for(var col=0;col<nc;col++)for(var r=0;r<2;r++){var x=swX(col)-10,y=r?52:20,on=(col*2+r)<up;D.rj(c,x,y,20,24,null,!r);c.fillStyle=on?(rnd()<.85?'#3ddc64':'#f2b01e'):'#30363b';c.fillRect(x+2,r?80:11,6,4);c.fillStyle=on?'#3ddc64':'#30363b';c.fillRect(x+12,r?80:11,6,4);}
    for(var s=0;s<4;s++){var x=838+s*36;c.fillStyle='#aeb5bb';c.fillRect(x,r=30,30,36);c.fillStyle='#0a0b0c';c.fillRect(x+3,33,24,30);if(s<sfp){c.fillStyle='#d9dde0';c.fillRect(x+4,34,22,28);c.fillStyle='#19c2c9';c.fillRect(x+6,40,8,16);c.fillRect(x+16,40,8,16);}}
    D.txt(c,name,836,16,13,'#e6eaed');c.fillStyle='#0aa3a0';c.fillRect(48,88,928,3);};},
  isr:function(c,W,H){D.base(c,H,'#343a40');c.fillStyle='#22272b';c.fillRect(48,10,928,172);D.txt(c,'Cisco 2900 Series',70,30,17,'#e6eaed');D.txt(c,'ISR 2911',70,52,12,'#9aa3ab');
@@ -599,8 +600,10 @@ var D={
  shelf:function(c,W,H){D.base(c,H,'#16181b');for(var x=80;x<950;x+=28){c.fillStyle='#050505';c.fillRect(x,H-40,16,8);}},
  fg:function(c,W,H){c.fillStyle='#eef0f1';c.fillRect(0,0,W,H);var g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(255,255,255,.5)');g.addColorStop(1,'rgba(0,0,0,.18)');c.fillStyle=g;c.fillRect(0,0,W,H);
    D.txt(c,'FortiGate 60E',60,H/2,H*.34,'#c8102e');['PWR','STA','HA','WAN1','WAN2','DMZ','1','2','3','4','5','6','7'].forEach(function(s,i){var x=440+i*42;D.txt(c,s,x,H*.3,H*.12,'#59626a','center');D.led(c,x,H*.62,i<4||i>5&&i<10?'#3ddc64':'#c9ced2',H*.07);});},
- cpe:function(c,W,H){c.fillStyle='#17191c';c.fillRect(0,0,W,H);D.txt(c,'CPE OPERADOR · FTTH',50,H*.3,H*.2,'#e6eaed');['PWR','PON','LOS','LAN1','LAN2','LAN3','LAN4','TEL','WLAN'].forEach(function(s,i){var x=70+i*100;D.txt(c,s,x,H*.62,H*.1,'#9aa3ab','center');D.led(c,x,H*.8,i===2?'#2b3035':'#3ddc64',H*.045);});}
+ cpe:function(c,W,H){c.fillStyle='#17191c';c.fillRect(0,0,W,H);D.txt(c,'ONT + CISCO 1941 · OPERADOR',50,H*.3,H*.2,'#e6eaed');['PWR','PON','LOS','LAN1','LAN2','LAN3','LAN4','TEL','WLAN'].forEach(function(s,i){var x=70+i*100;D.txt(c,s,x,H*.62,H*.1,'#9aa3ab','center');D.led(c,x,H*.8,i===2?'#2b3035':'#3ddc64',H*.045);});}
 };
+// Estado por defecto de la electrónica sobre U reservadas (maestro §9, S3D-03)
+var ST_U='PROPUESTA · posición U y electrónica (S3D-03)';
 function buildRacks(){
  var bodyM={dark:mat(0x1b1e21,{r:.5,m:.6}),sw:mat(0x2c3338,{r:.5,m:.6}),srv:mat(0x25282c,{r:.45,m:.7}),zinc:mat(0x9aa2a9,{r:.4,m:.8}),white:mat(0xeef0f1,{r:.4}),cpe:mat(0x17191c,{r:.4})};
  var cordM={blue:mat(0x1f6fd1,{r:.5}),grey:mat(0x9aa2a9,{r:.5}),yellow:mat(0xf2c200,{r:.5}),aqua:mat(0x19c2c9,{r:.4}),green:mat(0x2e9e4f,{r:.5}),red:mat(0xd63a2a,{r:.5}),white:mat(0xf1f1f1,{r:.5})};
@@ -622,7 +625,7 @@ function buildRacks(){
    if(type==='pp'){tx=devTex(1,D.pp(o.used||0,o.col||'#1f6fd1',name+' · '+model));depth=.11;}
    else if(type==='odf'){tx=devTex(1,D.odf(o.used||0,name+' · '+model));depth=.28;}
    else if(type==='org'){tx=devTex(1,D.org);depth=.03;}
-   else if(type==='sw'){tx=devTex(1,D.sw(model,o.up,o.sfp));depth=.42;body=bodyM.sw;}
+   else if(type==='sw'){tx=devTex(1,D.sw(o.face||model,o.up,o.sfp,undefined,o.ports||48));depth=.42;body=bodyM.sw;}
    else if(type==='isr'){tx=devTex(2,D.isr);depth=.47;body=bodyM.sw;}
    else if(type==='srv'){tx=devTex(2,D.srv(model));depth=.74;body=bodyM.srv;}
    else if(type==='ups'){tx=devTex(2,D.ups(model,o.lcd));depth=.66;}
@@ -634,21 +637,26 @@ function buildRacks(){
    if(type==='shelf'){mesh=new T.Mesh(new T.BoxGeometry(RW,.004,depth),bodyM.dark);mesh.position.set(0,Y(U,1)-UH/2+.004,zf-depth/2);devGroup.add(mesh);
      var lip=new T.Mesh(new T.BoxGeometry(RW,.02,.004),[bodyM.dark,bodyM.dark,bodyM.dark,bodyM.dark,f,bodyM.dark]);lip.position.set(0,Y(U,1)-UH/2+.012,zf);devGroup.add(lip);
      (o.items||[]).forEach(function(it){var t2=tex(512,Math.round(512*it.h/it.w),D[it.draw]);t2.wrapS=t2.wrapT=T.ClampToEdgeWrapping;var bm=bodyM[it.body],fm=new T.MeshStandardMaterial({map:t2,roughness:.5});
-       var b=new T.Mesh(new T.BoxGeometry(it.w,it.h,it.d),[bm,bm,bm,bm,fm,bm]);b.position.set(it.x,Y(U,1)-UH/2+.008+it.h/2,zf-.012-it.d/2);b.castShadow=true;b.userData.info={t:it.name,d:[['Equipo',it.model],['Posición','U'+U+(h>1?'–U'+(U+h-1):'')+' · sobre bandeja 19"'],['Estado','Propuesta sobre U reservadas']]};devGroup.add(b);pick.push(b);});
+       var b=new T.Mesh(new T.BoxGeometry(it.w,it.h,it.d),[bm,bm,bm,bm,fm,bm]);b.position.set(it.x,Y(U,1)-UH/2+.008+it.h/2,zf-.012-it.d/2);b.castShadow=true;
+       var bd=[['Equipo',it.model],['Posición','U'+U+(h>1?'–U'+(U+h-1):'')+' · sobre bandeja 19"'],['Estado',it.st||ST_U]];if(it.links)bd.push(['Enlaces',it.links]);
+       b.userData.info={t:it.name,d:bd};devGroup.add(b);pick.push(b);});
      mesh=null;}
    else{mesh=new T.Mesh(new T.BoxGeometry(type==='org'||type==='pp'||type==='blank'||type==='pdu'?RW:RW,hh,depth),[body,body,body,body,f,body]);mesh.position.set(0,y,zf-depth/2+(type==='org'?.03:0));mesh.castShadow=true;devGroup.add(mesh);
      if(type==='org'){for(var k=0;k<5;k++){var rx=px2x(165+k*175);var ring=new T.Mesh(new T.TorusGeometry(.016,.003,6,14),bodyM.zinc);ring.position.set(rx,y,zf+.045);ring.rotation.y=PI/2;devGroup.add(ring);}}
-     if(type!=='org'&&type!=='blank'){mesh.userData.info={t:name,d:[['Equipo',model],['Posición','U'+U+(h>1?'–U'+(U+h-1):'')],['Estado',o.plan?'Previsto en el alzado del plano':'Propuesta sobre U reservadas']]};pick.push(mesh);}}
+     if(type!=='org'&&type!=='blank'){var md=[['Equipo',model],['Posición','U'+U+(h>1?'–U'+(U+h-1):'')],['Estado',o.st||(o.plan?'Previsto en el alzado del plano':ST_U)]];if(o.links)md.push(['Enlaces',o.links]);
+       mesh.userData.info={t:name,d:md};pick.push(mesh);}}
    if(type!=='org'&&type!=='blank'){rows.push([U,h,name,model]);
      var cx=W/2+.06;line(call,[new V3(RW/2+.02,y,zf+.01),new V3(cx+.1,y,zf+.01)],0x5d6b78);
      label(call,(h>1?'U'+U+'–'+(U+h-1):'U'+U)+'  ·  '+name+'  ·  '+model,cx+.12,y,zf+.01,{size:.036,left:1,border:o.plan?'#6b7f8e':'#e8590c'});}
   });
-  // latiguillos
-  function cord(a,b,m,r,k){var xa=px2x(a[1]),xb=px2x(b[1]),ya=Y(a[0]),yb=Y(b[0]),s=(xa+xb<0?-1:1),sx=s*(W>.7?.325:.262)+s*(k%4)*.006,z1=zf+.012,z2=zf+.05+(k%3)*.006;
+  // latiguillos · a/b = [U, x en px de la cara, sentido de salida (−1 abajo, 1 arriba), fila del puerto (+.17 superior, −.17 inferior)]
+  // id = enlace de la matriz aprobada (maestro §12–§13); se rotula en la vista de detalle del rack
+  function cord(a,b,m,r,k,id){var xa=px2x(a[1]),xb=px2x(b[1]),ya=Y(a[0])+(a[3]||0)*UH,yb=Y(b[0])+(b[3]||0)*UH,s=(xa+xb<0?-1:1),sx=s*(W>.7?.325:.262)+s*(k%4)*.006,z1=zf+.012,z2=zf+.05+(k%3)*.006;
     var da=a[2]||-1,db=b[2]||-1;
     var pts=[new V3(xa,ya,z1),new V3(xa,ya+da*UH*.55,z2),new V3(xa+s*.03,ya+da*UH,z2+.006),new V3(sx,ya+da*UH*1.05,z2),new V3(sx+s*.004,(ya+yb)/2,z2+.008),new V3(sx,yb+db*UH*1.05,z2),new V3(xb+s*.03,yb+db*UH,z2+.006),new V3(xb,yb+db*UH*.55,z2),new V3(xb,yb,z1)];
     var mesh=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts,false,'catmullrom',.25),56,r||.0028,6),m);mesh.castShadow=true;devGroup.add(mesh);
-    [pts[0],pts[8]].forEach(function(p){var pl=new T.Mesh(new T.BoxGeometry(.011,.009,.03),m);pl.position.set(p.x,p.y,p.z+.008);devGroup.add(pl);});}
+    [pts[0],pts[8]].forEach(function(p){var pl=new T.Mesh(new T.BoxGeometry(.011,.009,.03),m);pl.position.set(p.x,p.y,p.z+.008);devGroup.add(pl);});
+    if(id)label(call,id,pts[4].x+s*.022,pts[4].y,pts[4].z+.01,{size:.022,color:'#fff',bg:'#12395c'});}
   R.cords(cord,cordM);
   flush();
   // escenario para la vista aislada
@@ -660,33 +668,49 @@ function buildRacks(){
   RK[R.key]={g:g,call:call,stage:st,proxy:pr,rows:rows,R:R};}
 
  rack({key:'of',name:'OF-01',x:16.5,z:9.5,ry:-PI/2,W:.6,title:'RACK OF-01 · distribuidor de planta · 42U 600×1000',
-  info:{t:'Rack OF-01 · distribuidor de planta',d:[['Ubicación','Departamento de TI'],['Armario','42U · 600 × 1000'],['Paneles Cat6A','4 × PP 24p = 96 RJ45 · 64 en uso'],['Troncal','ODF 24 LC OM4 12F + PP cobre (2)'],['Ocupación','12 U pasivos · 11 U reserva · 19 U libres'],['Detalle','Usa la vista «Detalle del rack OF-01»']]},
+  info:{t:'Rack OF-01 · distribuidor de planta',d:[['Ubicación','Departamento de TI'],['Armario','42U · 600 × 1000'],['Paneles Cat6A','4 × PP 24p = 96 RJ45 · 64 en uso'],['Troncal','ODF 24 LC OM4 12F + PP cobre (2)'],['Ocupación','12 U pasivos · 11 U reserva · 19 U libres'],['Enlaces AS-IS','E07 (un par de fibra) y E09–E11 y E14 en SW-ACC-01 Gi1/0/1–4'],['Estado','PROPUESTA · U y electrónica S3D-03; simplificaciones S3D-10'],['Detalle','Usa la vista «Detalle del rack OF-01»']]},
   dev:[[42,1,'odf','ODF-T','ODF 24 LC · troncal OM4 12F',{used:6,plan:1}],[41,1,'pp','PP-T','Cat6A · troncal cobre (2)',{used:2,col:'#f2c200',plan:1}],[40,1,'org'],
    [39,1,'pp','PP-01','O-01…O-12 · 24 RJ45',{used:24,plan:1}],[38,1,'org'],[37,1,'pp','PP-02','O-13…O-24 · 24 RJ45',{used:24,plan:1}],[36,1,'org'],
    [35,1,'pp','PP-03','O-25…O-32 + reserva',{used:16,plan:1}],[34,1,'org'],[33,1,'pp','PP-04','reserva AP / cámaras',{used:1,col:'#2e9e4f',plan:1}],[32,1,'org'],
-   [30,1,'sw','SW-ACC-01','Catalyst 2960-S Series · 48p',{up:44,sfp:2}],[29,1,'org'],[28,1,'sw','SW-ACC-01B','Catalyst 2960-S Series · 48p (apilado)',{up:22,sfp:0}],[27,1,'org'],
+   [30,1,'sw','SW-ACC-01','Catalyst 2960-S Series · 48p',{up:44,sfp:1,links:'E07 uplink óptico Gi1/0/49 (D-027) · E09 Gi1/0/1 · E10 Gi1/0/2 · E11 Gi1/0/3 (shutdown provisional) · E14 Gi1/0/4'}],[29,1,'org'],[28,1,'sw','SW-ACC-01B','Catalyst 2960-S Series · 48p (apilado)',{up:22,sfp:0,st:'PROPUESTA TO-BE Fase 6 (S3D-01); fuera del inventario AS-IS'}],[27,1,'org'],
    [24,3,'blank'],[21,3,'blank'],
-   [4,2,'ups','SAI-OF','SAI on-line 1,5 kVA · 2U',{lcd:1}],[1,1,'pdu','PDU-OF','Regleta 19" 8 × Schuko 16 A',{plan:1}]],
-  cords:function(cord,cm){var k=0,i;for(i=0;i<24;i+=2){cord([39,ppX(i)],[30,swX(Math.floor(i/2)),1],cm.blue,0,k++);cord([37,ppX(i+1)],[30,swX(12+Math.floor(i/2)),1],cm.blue,0,k++);}
-   for(i=0;i<16;i+=2)cord([35,ppX(i)],[28,swX(i/2+ (i>7?4:0)),1],cm.grey,0,k++);cord([33,ppX(0)],[28,swX(20),1],cm.green,0,k++);
-   cord([42,134+0],[30,853,1],cm.aqua,.0018,k++);cord([42,196],[30,889,1],cm.aqua,.0018,k++);cord([41,ppX(0)],[28,swX(23),1],cm.yellow,0,k++);}});
+   [4,2,'ups','SAI-OF','SAI on-line 1,5 kVA · 2U',{lcd:1,st:'PROPUESTA TO-BE Fase 6 (S3D-02); fuera del inventario AS-IS'}],[1,1,'pdu','PDU-OF','Regleta 19" 8 × Schuko 16 A',{plan:1}]],
+  cords:function(cord,cm){var k=0,i;
+   // Enlaces de la matriz aprobada en SW-ACC-01
+   cord([39,ppX(0)],[30,swX(0),1,.17],cm.blue,0,k++,'E09');cord([39,ppX(1)],[30,swX(0),1,-.17],cm.blue,0,k++,'E10');
+   cord([33,ppX(0)],[30,swX(1),1,.17],cm.green,0,k++,'E11');
+   cord([42,134],[30,853,1],cm.aqua,.0018,k++,'E07');
+   // Latiguillos horizontales ilustrativos del concepto (S3D-10); no son enlaces AS-IS
+   for(i=0;i<24;i+=2){if(i>=4)cord([39,ppX(i)],[30,swX(Math.floor(i/2)),1],cm.blue,0,k++);cord([37,ppX(i+1)],[30,swX(12+Math.floor(i/2)),1],cm.blue,0,k++);}
+   for(i=0;i<16;i+=2){if(i!==6)cord([35,ppX(i)],[28,swX(i/2+ (i>7?4:0)),1],cm.grey,0,k++);}
+   // E14 PC-TI-50 (D-025, D-027): SW-ACC-01 Gi1/0/4; toma O-28 del Dpto. de TI ilustrativa
+   cord([35,ppX(6)],[30,swX(1),1,-.17],cm.blue,0,k++,'E14');}});
 
  rack({key:'al',name:'AL-01',x:39,z:37,ry:PI/2,W:.8,title:'RACK AL-01 · distribuidor de edificio · 42U 800×1000',
-  info:{t:'Rack AL-01 · distribuidor de edificio',d:[['Ubicación','Sala técnica'],['Armario','42U · 800 × 1000'],['Paneles Cat6A','4 × PP 24p = 96 RJ45 · 44 en uso'],['Troncal y acometida','ODF troncal OM4 12F + ODF operadores'],['Ocupación','13 U pasivos · 15 U reserva · 14 U libres'],['Detalle','Usa la vista «Detalle del rack AL-01»']]},
-  dev:[[41,1,'shelf','RTR-ISP','CPE del operador',{items:[{name:'RTR-ISP · router del proveedor',model:'CPE del operador (equipo cedido) · acceso WAN',draw:'cpe',body:'cpe',w:.26,h:.045,d:.2,x:-.08}]}],
+  info:{t:'Rack AL-01 · distribuidor de edificio',d:[['Ubicación','Sala técnica'],['Armario','42U · 800 × 1000'],['Paneles Cat6A','4 × PP 24p = 96 RJ45 · 44 en uso'],['Troncal y acometida','ODF troncal OM4 12F + ODF operadores'],['Ocupación','13 U pasivos · 15 U reserva · 14 U libres'],['Enlaces AS-IS','E01–E08 y E12–E13 (maestro §12–§13); un latiguillo por enlace, sin redundancia'],['Estado','PROPUESTA · U y electrónica S3D-03; simplificaciones S3D-10'],['Detalle','Usa la vista «Detalle del rack AL-01»']]},
+  dev:[[41,1,'shelf','RTR-ISP','ONT + RTR-ISP · Cisco 1941 del operador',{items:[{name:'ONT + RTR-ISP · Cisco 1941 del operador',model:'ONT del operador (llegada en fibra) + Cisco 1941 (CISCO1941/K9) del operador · entrega en cobre',draw:'cpe',body:'cpe',w:.26,h:.045,d:.2,x:-.08,links:'E01 fibra del operador hasta la ONT; ONT → Gi0/0 en cobre · E02 Gi0/1 → FW-01'}]}],
    [40,1,'odf','ODF-OP','ODF · acometida operadores',{used:2,plan:1}],[39,1,'odf','ODF-T','ODF 24 LC · troncal OM4 12F',{used:6,plan:1}],[38,1,'pp','PP-T','Cat6A · troncal cobre (2)',{used:2,col:'#f2c200',plan:1}],[37,1,'org'],
    [36,1,'pp','PP-01','A-01…A-12 · 24 RJ45',{used:24,col:'#19a3a8',plan:1}],[35,1,'org'],[34,1,'pp','PP-02','A-13…A-22 + reserva',{used:20,col:'#19a3a8',plan:1}],[33,1,'org'],
    [32,1,'pp','PP-03','reserva AP / cámaras',{used:0,plan:1}],[31,1,'org'],[30,1,'pp','PP-04','reserva AP / cámaras',{used:0,plan:1}],[29,1,'org'],
-   [27,1,'shelf','FW-01','Fortinet FortiGate 60E',{items:[{name:'FW-01 · firewall perimetral',model:'Fortinet FortiGate 60E',draw:'fg',body:'white',w:.216,h:.038,d:.16,x:0}]}],
-   [25,2,'isr','RTR-01','Cisco ISR 2911 · router corporativo'],[24,1,'org'],
-   [23,1,'sw','SW-DIST-01','Catalyst 3750-X Series · 48p',{up:30,sfp:4}],[22,1,'org'],[21,1,'sw','SW-ACC-02','Catalyst 2960-S Series · 48p',{up:44,sfp:2}],[20,1,'org'],
-   [16,2,'srv','SRV-AD-01','PowerEdge R720 · Active Directory'],[13,2,'srv','SRV-APP-01','PowerEdge R730 · aplicaciones'],
-   [10,2,'blank'],[5,2,'ups','SAI-AL','SAI on-line 3 kVA · 2U',{lcd:1}],[3,2,'ups','BAT-AL','Módulo de baterías · 2U'],[1,1,'pdu','PDU-AL','Regleta 19" 8 × Schuko 16 A',{plan:1}]],
-  cords:function(cord,cm){var k=0,i;for(i=0;i<24;i+=2){cord([36,ppX(i)],[21,swX(i/2),1],cm.blue,0,k++);cord([34,ppX(i<20?i:19)],[21,swX(12+i/2),1],cm.blue,0,k++);}
-   cord([39,134],[23,853,1],cm.aqua,.0018,k++);cord([39,196],[23,889,1],cm.aqua,.0018,k++);cord([21,853,-1],[23,925,1],cm.aqua,.0018,k++);
-   cord([38,ppX(0)],[23,swX(23),1],cm.yellow,0,k++);cord([25,216,-1],[23,swX(0),1],cm.yellow,0,k++);cord([25,260,-1],[23,swX(1),1],cm.yellow,0,k++);
-   for(i=2;i<8;i++)cord([23,swX(i),-1],[21,swX(i+13),1],cm.grey,0,k++);
-   cord([40,134],[41,300,1],cm.aqua,.0018,k++);}});
+   [27,1,'shelf','FW-01','Fortinet FortiGate 60E',{items:[{name:'FW-01 · firewall perimetral',model:'Fortinet FortiGate 60E',draw:'fg',body:'white',w:.216,h:.038,d:.16,x:0,links:'E02 puerto WAN (pendiente) · E03 puerto interior (pendiente) → RTR-01 Gi0/0'}]}],
+   [25,2,'isr','RTR-01','Cisco ISR 2911 · router corporativo',{links:'E03 Gi0/0 (tránsito) · E04 Gi0/1 (trunk) → SW-DIST-01 Gi1/0/1'}],[24,1,'org'],
+   [23,1,'sw','SW-DIST-01','Catalyst 3750-X · WS-C3750X-24T-S · 24p + C3KX-NM-1G',{face:'WS-C3750X-24T-S · 24p',ports:24,up:4,sfp:1,links:'E04 Gi1/0/1 · E05 Gi1/0/2 · E06 Gi1/0/3 · E08 Gi1/0/4 · E07 uplink óptico Gi1/1/1 en C3KX-NM-1G (D-027)'}],[22,1,'org'],
+   [21,1,'sw','SW-ACC-02','Catalyst 2960-S · WS-C2960S-24PS-L · 24p PoE+ 370 W',{face:'WS-C2960S-24PS-L · 24p',ports:24,up:24,sfp:0,links:'E08 Gi1/0/24 · E12 Gi1/0/1 · E13 Gi1/0/2'}],[20,1,'org'],
+   [16,2,'srv','SRV-AD-01','PowerEdge R720 · Active Directory',{links:'E05 NIC de producción (pendiente) → SW-DIST-01 Gi1/0/2'}],[13,2,'srv','SRV-APP-01','PowerEdge R730 · aplicaciones',{links:'E06 NIC de producción (pendiente) → SW-DIST-01 Gi1/0/3'}],
+   [10,2,'blank'],[5,2,'ups','SAI-AL','SAI on-line 3 kVA · 2U',{lcd:1,st:'PROPUESTA TO-BE Fase 6 (S3D-02); fuera del inventario AS-IS'}],[3,2,'ups','BAT-AL','Módulo de baterías · 2U',{st:'PROPUESTA TO-BE Fase 6 (S3D-02); fuera del inventario AS-IS'}],[1,1,'pdu','PDU-AL','Regleta 19" 8 × Schuko 16 A',{plan:1}]],
+  cords:function(cord,cm){var k=0,i;
+   // Enlaces de la matriz aprobada E01–E08, E12–E13 (un latiguillo por enlace)
+   cord([40,134],[41,300,1],cm.aqua,.0018,k++,'E01');
+   cord([41,465],[27,620,1],cm.red,0,k++,'E02');
+   cord([27,680],[25,216,1],cm.yellow,0,k++,'E03');
+   cord([25,260,-1],[23,swX(0),1,.17],cm.yellow,0,k++,'E04');
+   cord([23,swX(0),-1,-.17],[17,962,1],cm.yellow,0,k++,'E05');
+   cord([23,swX(1),-1,.17],[14,962,1],cm.yellow,0,k++,'E06');
+   cord([39,134],[23,853,1],cm.aqua,.0018,k++,'E07');
+   cord([23,swX(1),-1,-.17],[21,swX(11),1,-.17],cm.grey,0,k++,'E08');
+   cord([36,ppX(0)],[21,swX(0),1,.17],cm.blue,0,k++,'E12');cord([36,ppX(1)],[21,swX(0),1,-.17],cm.blue,0,k++,'E13');
+   // Latiguillos horizontales ilustrativos (S3D-10) en el switch de 24 puertos: columnas Gi1/0/3–22; Gi1/0/24 queda para E08
+   for(i=2;i<22;i+=2)cord([36,ppX(i)],[21,swX(i/2),1],cm.blue,0,k++);}});
 }
 
 // ====== Cámara, vistas y recorrido ======
@@ -700,7 +724,7 @@ function layerOn(k){var cb=document.getElementById('l-'+k);return cb?cb.checked:
 function setIso(k){iso=k;Object.keys(L).forEach(function(n){L[n].visible=k?false:layerOn(n);});
   Object.keys(RK).forEach(function(n){var r=RK[n];r.g.visible=!k||k===n;r.call.visible=r.stage.visible=(k===n);r.proxy.visible=!k;});
   document.body.classList.toggle('iso',!!k);scene.fog.near=k?500:150;scene.fog.far=k?900:340;
-  if(k){var r=RK[k];card.innerHTML='<h3>'+esc(r.R.title)+'</h3><p>Etiquetas con borde naranja: electrónica propuesta sobre U reservadas. Borde gris: pasivos del alzado del plano. Haz clic en un equipo para ver su ficha.</p>';}
+  if(k){var r=RK[k];card.innerHTML='<h3>'+esc(r.R.title)+'</h3><p>Estado: PROPUESTA. Etiquetas con borde naranja: electrónica propuesta sobre U reservadas (S3D-03). Borde gris: pasivos del alzado del plano. Los latiguillos rotulados E01–E14 siguen la matriz de enlaces aprobada (un enlace por par de equipos, sin redundancia); los no rotulados ilustran el cableado horizontal conceptual (S3D-10). Haz clic en un equipo para ver su ficha.</p>';}
   else card.innerHTML=CARD0;}
 function usable(){var off=window.innerWidth>760?316:0;return(stage.clientWidth-off)/stage.clientHeight;}
 function goto(name,instant){var p,t,ua=usable();
