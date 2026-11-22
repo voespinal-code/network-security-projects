@@ -2,7 +2,7 @@
 
 # LogiTrans Iberia · Modernización de red y seguridad
 
-![Fase 0](https://img.shields.io/badge/Fase_0-definida-1BA0D7) ![Laboratorio](https://img.shields.io/badge/laboratorio-GNS3_·_Proxmox-0B3C5D) ![Idioma](https://img.shields.io/badge/docs-español-555) [![Modelo 3D](https://img.shields.io/badge/modelo_3D-abrir_en_el_navegador-E07B00)](https://voespinal-code.github.io/network-security-projects/logitrans-iberia/3d/)
+![Fase 0](https://img.shields.io/badge/Fase_0-definida-1BA0D7) ![Fase 1](https://img.shields.io/badge/Fase_1-parte_A_publicada-1BA0D7) ![Laboratorio](https://img.shields.io/badge/laboratorio-GNS3_·_Proxmox-0B3C5D) ![Idioma](https://img.shields.io/badge/docs-español-555) [![Modelo 3D](https://img.shields.io/badge/modelo_3D-abrir_en_el_navegador-E07B00)](https://voespinal-code.github.io/network-security-projects/logitrans-iberia/3d/)
 
 Este proyecto es un **caso completo de ingeniería de redes** basado en un trabajo real para una empresa logística, **anonimizado** por confidencialidad. Recorre todo el ciclo de un proyecto de infraestructura:
 
@@ -26,7 +26,7 @@ Cada tecnología entra en el proyecto solo cuando responde a un problema documen
 | Fase | Contenido | Estado |
 |---|---|---|
 | **0** | [La empresa y el problema](docs/FASE_0_EMPRESA.md) | ✅ Publicada |
-| 1 | Levantamiento y diagnóstico AS-IS | Próximamente |
+| **1** | [Levantamiento y diagnóstico AS-IS](docs/FASE_1_AS-IS.md) | ✅ Parte A publicada · parte B (laboratorio) en curso |
 | 2 | Diseño TO-BE (HLD/LLD) | Planificada |
 | 3 | Migración LAN: VLAN, STP, LACP y HSRP con MOP y *rollback* | Planificada |
 | 4 | *Hardening* L2: Port Security, DHCP Snooping y DAI | Planificada |
@@ -40,6 +40,16 @@ Cada tecnología entra en el proyecto solo cuando responde a un problema documen
 Una nave logística de 2.400 m² en Barcelona, con 60 empleados y 34 puestos informáticos, cuya operación (ERP, WMS, identidad y telefonía IP) depende de la red. La Fase 0 define el negocio, la sede, el alcance y los **9 problemas que se van a investigar**.
 
 👉 [Leer la Fase 0 completa](docs/FASE_0_EMPRESA.md)
+
+## Fase 1 · Levantamiento y diagnóstico AS-IS
+
+<p align="center"><a href="docs/FASE_1_AS-IS.md"><img src="assets/img/portada_fase1.png" alt="Fase 1: Levantamiento AS-IS" width="100%"></a></p>
+
+La red documentada tal como es, antes de cambiar nada: inventario de 14 equipos, matriz de enlaces E01–E14, topologías física y lógica, plan IP, servicios AD/DNS/DHCP/NTP, política del FortiGate, matriz de riesgos y un plan de 20 pruebas. Incluye el diseño del laboratorio en Proxmox + GNS3, con un segmento físico real aislado.
+
+La **parte A** (documental) está publicada. La **parte B** monta el laboratorio y ejecuta las 20 pruebas, con evidencia de cada resultado.
+
+👉 [Leer la Fase 1](docs/FASE_1_AS-IS.md)
 
 ## Avance · Concepto 3D del cableado estructurado
 
@@ -65,7 +75,7 @@ El plano de cableado de la Fase 6 (LGT-F02-CAB-01) llevado a un modelo navegable
 
 ## Stack
 
-`Cisco IOS / IOL` · `Catalyst 3750-X / 2960-S` · `ISR 2911` · `FortiGate (FortiOS)` · `Windows Server 2022 — AD DS, DNS, DHCP` · `Debian/Ubuntu` · `GNS3` · `Proxmox VE` · `draw.io` · `three.js`
+`Cisco IOS / IOL` · `Catalyst 3750-X / 2960-S` · `ISR 2911` · `FortiGate (FortiOS)` · `Windows Server 2025 — AD DS, DNS, DHCP` · `Ubuntu Server 24.04` · `GNS3` · `Proxmox VE` · `draw.io` · `three.js`
 
 ## Transparencia
 
