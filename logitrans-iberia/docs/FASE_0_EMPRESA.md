@@ -87,4 +87,4 @@ Son **hipótesis por reproducir**, no incidencias ya observadas. Cada una tendr�
 
 ---
 
-⬅️ [Volver al README](../README.md) · ➡️ Fase 1: Levantamiento AS-IS (próximamente)
+⬅️ [Volver al README](../README.md) · ➡️ [Fase 1: Levantamiento AS-IS](FASE_1_AS-IS.md)
